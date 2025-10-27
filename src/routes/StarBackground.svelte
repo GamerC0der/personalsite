@@ -48,7 +48,6 @@
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Fill with black background
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
