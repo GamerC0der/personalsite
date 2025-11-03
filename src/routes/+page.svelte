@@ -5,6 +5,12 @@
   import { onMount } from 'svelte';
 
   let windowPos = { x: 0, y: 0 };
+  let currentUrl = 'https://www.msn.com/';
+  let inputUrl = 'https://www.msn.com/';
+  let urlHistory = ['https://www.msn.com/'];
+  let historyIndex = 0;
+
+  $: inputUrl = currentUrl;
 
   onMount(() => {
     windowPos.x = window.innerWidth / 2 - 300;
@@ -53,6 +59,38 @@
   function closeWindow() {
     isMinimized = true;
   }
+
+  function navigateToUrl(url) {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    currentUrl = url;
+    if (historyIndex < urlHistory.length - 1) {
+      urlHistory = urlHistory.slice(0, historyIndex + 1);
+    }
+    urlHistory.push(url);
+    historyIndex = urlHistory.length - 1;
+  }
+
+  function goToUrl() {
+    if (inputUrl.trim()) {
+      navigateToUrl(inputUrl.trim());
+    }
+  }
+
+  function goBack() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      currentUrl = urlHistory[historyIndex];
+    }
+  }
+
+  function goForward() {
+    if (historyIndex < urlHistory.length - 1) {
+      historyIndex++;
+      currentUrl = urlHistory[historyIndex];
+    }
+  }
 </script>
 
 <div style="background-color: black; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
@@ -76,30 +114,39 @@
   </div>
   <div class="browser-toolbar">
     <div class="nav-buttons">
-      <button class="nav-btn" disabled>&lt;</button>
-      <button class="nav-btn" disabled>&gt;</button>
+      <button class="nav-btn" on:click={goBack} disabled={historyIndex <= 0}>&lt;</button>
+      <button class="nav-btn" on:click={goForward} disabled={historyIndex >= urlHistory.length - 1}>&gt;</button>
       <button class="nav-btn">X</button>
       <button class="nav-btn" on:click={() => window.location.reload()}>R</button>
-      <button class="nav-btn" on:click={() => window.location.href = '/'}>H</button>
+      <button class="nav-btn" on:click={() => navigateToUrl('https://www.msn.com/')}>H</button>
     </div>
   </div>
 
   <div class="address-bar">
     <div class="address-label">Address:</div>
-    <input type="text" class="address-input" value="http://localhost:5173/" readonly>
-    <button class="go-btn">Go</button>
+    <input type="text" class="address-input" bind:value={inputUrl} on:keydown={(e) => { if (e.key === 'Enter') goToUrl(); }}>
+    <button class="go-btn" on:click={goToUrl}>Go</button>
   </div>
 
   <div class="webpage-content">
-    <div class="social-icons">
-      <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
-      </a>
-      <a href="https://slack.com" target="_blank" rel="noopener noreferrer">
-        <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
-      </a>
-    </div>
-    <button class="projects-btn" on:click={() => window.location.href = '/projects'}>Projects</button>
+    {#if currentUrl === 'https://www.msn.com/'}
+      <div class="social-icons">
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
+        </a>
+        <a href="https://slack.com" target="_blank" rel="noopener noreferrer">
+          <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
+        </a>
+      </div>
+      <button class="projects-btn" on:click={() => window.location.href = '/projects'}>Projects</button>
+    {:else}
+      <iframe
+        src={currentUrl}
+        class="web-iframe"
+        title="Web content"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      ></iframe>
+    {/if}
   </div>
 
   <div class="status-bar">
@@ -263,5 +310,11 @@
 
   .projects-btn:hover {
     border: 2px inset #c0c0c0;
+  }
+
+  .web-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
   }
 </style>
