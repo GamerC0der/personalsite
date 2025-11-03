@@ -55,8 +55,8 @@
         <div
           class="item"
           class:programs-item={text === 'Programs'}
-          on:click={() => open = false}
-          on:keydown={() => open = false}
+          on:click={() => { if (text === 'Log Off') window.location.reload(); else open = false; }}
+          on:keydown={() => { if (text === 'Log Off') window.location.reload(); else open = false; }}
           on:mouseenter={text === 'Programs' ? () => { programsItemHovered = true; updateProgramsMenuState(); } : null}
           on:mouseleave={text === 'Programs' ? () => { programsItemHovered = false; closeProgramsMenu(); } : null}
           role="button"
