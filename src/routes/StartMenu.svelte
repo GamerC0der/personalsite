@@ -1,4 +1,9 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+
+  export let openNewWindow;
+
   let open = false;
   let programsMenuOpen = false;
   let programsItemHovered = false;
@@ -57,8 +62,26 @@
         <div
           class="item"
           class:programs-item={text === 'Programs'}
-          on:click={() => { if (text === 'Log Off') window.location.reload(); else open = false; }}
-          on:keydown={() => { if (text === 'Log Off') window.location.reload(); else open = false; }}
+          on:click={() => {
+            if (text === 'Log Off') {
+              window.location.reload();
+            } else if (text === 'Windows Update') {
+              openNewWindow('https://www.msn.com/update');
+              open = false;
+            } else {
+              open = false;
+            }
+          }}
+          on:keydown={() => {
+            if (text === 'Log Off') {
+              window.location.reload();
+            } else if (text === 'Windows Update') {
+              openNewWindow('https://www.msn.com/update');
+              open = false;
+            } else {
+              open = false;
+            }
+          }}
           on:mouseenter={text === 'Programs' ? () => { programsItemHovered = true; updateProgramsMenuState(); } : null}
           on:mouseleave={text === 'Programs' ? () => { programsItemHovered = false; closeProgramsMenu(); } : null}
           role="button"

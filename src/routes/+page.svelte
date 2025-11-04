@@ -4,14 +4,28 @@
   import '../app.css';
   import { onMount, onDestroy } from 'svelte';
 
-  let windowPos = { x: 0, y: 0 };
-  let currentUrl = 'https://www.msn.com/';
-  let inputUrl = 'https://www.msn.com/';
-  let urlHistory = ['https://www.msn.com/'];
-  let historyIndex = 0;
-  let currentTime = '';
+  let windows = [
+    {
+      id: 1,
+      windowPos: { x: 0, y: 0 },
+      currentUrl: 'https://www.msn.com/',
+      inputUrl: 'https://www.msn.com/',
+      urlHistory: ['https://www.msn.com/'],
+      historyIndex: 0,
+      isMinimized: false,
+      isMaximized: false,
+      originalSize: { width: 600, height: 'auto' },
+      originalPos: { x: 100, y: 100 },
+      sidebarOpen: false,
+      favorites: [
+        { name: 'NextJS', url: 'https://nextjs.org' },
+        { name: 'HackClub', url: 'https://hackclub.com' }
+      ]
+    }
+  ];
 
-  $: inputUrl = currentUrl;
+  let currentTime = '';
+  let nextWindowId = 2;
 
   let timeInterval;
 
@@ -20,10 +34,33 @@
   }
 
   onMount(() => {
-    windowPos.x = window.innerWidth / 2 - 300;
-    windowPos.y = window.innerHeight / 2 - 200;
+    console.log('jQuery version:', window.$.fn.jquery);
+    console.log('jQuery UI available:', typeof window.$.fn.draggable === 'function');
+
+    windows[0].windowPos.x = window.innerWidth / 2 - 300;
+    windows[0].windowPos.y = window.innerHeight / 2 - 200;
     updateTime();
     timeInterval = setInterval(updateTime, 1000);
+
+    // Initialize jQuery draggable for all windows
+    setTimeout(() => {
+      console.log('Initializing draggable for windows');
+      console.log('Windows found:', window.$('.window').length);
+      window.$('.window').each((i, el) => {
+        console.log('Setting up draggable for window:', el, 'has maximized class:', window.$(el).hasClass('maximized'));
+        if (!window.$(el).hasClass('maximized')) {
+          console.log('Making window draggable');
+          window.$(el).draggable({
+            handle: '.title-bar',
+            containment: 'document',
+            start: function() { console.log('Drag started'); },
+            drag: function() { console.log('Dragging...'); },
+            stop: function() { console.log('Drag stopped'); }
+          });
+          console.log('Draggable initialized for window');
+        }
+      });
+    }, 100);
   });
 
   onDestroy(() => {
@@ -31,93 +68,124 @@
       clearInterval(timeInterval);
     }
   });
-  let isDragging = false;
-  let dragOffset = { x: 0, y: 0 };
 
-  let isMinimized = false;
-  let isMaximized = false;
-  let originalSize = { width: 600, height: 'auto' };
-  let originalPos = { x: 100, y: 100 };
-  let sidebarOpen = false;
-  let favorites = [
-    { name: 'NextJS', url: 'https://nextjs.org' },
-    { name: 'HackClub', url: 'https://hackclub.com' }
-  ];
-
-  function startDrag(event) {
-    isDragging = true;
-    dragOffset.x = event.clientX - windowPos.x;
-    dragOffset.y = event.clientY - windowPos.y;
+  function minimizeWindow(windowId) {
+    // Remove the window from the array (close it)
+    windows = windows.filter(w => w.id !== windowId);
   }
 
-  function drag(event) {
-    if (isDragging) {
-      windowPos.x = event.clientX - dragOffset.x;
-      windowPos.y = event.clientY - dragOffset.y;
+  function maximizeWindow(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window) {
+      if (!window.isMaximized) {
+        window.originalPos = { ...window.windowPos };
+        window.originalSize = { width: 600, height: 400 };
+        window.isMaximized = true;
+        window.windowPos = { x: 0, y: 0 };
+        // Disable dragging when maximized
+        setTimeout(() => {
+          window.$(`.window[data-window-id="${windowId}"]`).draggable('disable');
+        }, 50);
+      } else {
+        window.windowPos = { ...window.originalPos };
+        window.isMaximized = false;
+        // Re-enable dragging when restored
+        setTimeout(() => {
+          window.$(`.window[data-window-id="${windowId}"]`).draggable('enable');
+        }, 50);
+      }
     }
   }
 
-  function stopDrag() {
-    isDragging = false;
-  }
-
-  function minimizeWindow() {
-    isMinimized = true;
-  }
-
-  function maximizeWindow() {
-    if (!isMaximized) {
-      originalPos = { ...windowPos };
-      isMaximized = true;
-      windowPos = { x: 0, y: 0 };
-    } else {
-      windowPos = { ...originalPos };
-      isMaximized = false;
+  function closeWindow(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window) {
+      window.isMinimized = true;
     }
   }
 
-  function closeWindow() {
-    isMinimized = true;
-  }
-
-  function navigateToUrl(url) {
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-    currentUrl = url;
-    if (historyIndex < urlHistory.length - 1) {
-      urlHistory = urlHistory.slice(0, historyIndex + 1);
-    }
-    urlHistory.push(url);
-    historyIndex = urlHistory.length - 1;
-  }
-
-  function goToUrl() {
-    if (inputUrl.trim()) {
-      navigateToUrl(inputUrl.trim());
+  function navigateToUrl(windowId, url) {
+    const window = windows.find(w => w.id === windowId);
+    if (window) {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      window.currentUrl = url;
+      if (window.historyIndex < window.urlHistory.length - 1) {
+        window.urlHistory = window.urlHistory.slice(0, window.historyIndex + 1);
+      }
+      window.urlHistory.push(url);
+      window.historyIndex = window.urlHistory.length - 1;
+      window.inputUrl = url;
     }
   }
 
-  function goBack() {
-    if (historyIndex > 0) {
-      historyIndex--;
-      currentUrl = urlHistory[historyIndex];
+  function goToUrl(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window && window.inputUrl.trim()) {
+      navigateToUrl(windowId, window.inputUrl.trim());
     }
   }
 
-  function goForward() {
-    if (historyIndex < urlHistory.length - 1) {
-      historyIndex++;
-      currentUrl = urlHistory[historyIndex];
+  function goBack(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window && window.historyIndex > 0) {
+      window.historyIndex--;
+      window.currentUrl = window.urlHistory[window.historyIndex];
+      window.inputUrl = window.currentUrl;
     }
   }
 
-  function toggleSidebar() {
-    sidebarOpen = !sidebarOpen;
+  function goForward(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window && window.historyIndex < window.urlHistory.length - 1) {
+      window.historyIndex++;
+      window.currentUrl = window.urlHistory[window.historyIndex];
+      window.inputUrl = window.currentUrl;
+    }
   }
 
-  function removeFavorite(url) {
-    favorites = favorites.filter(fav => fav.url !== url);
+  function toggleSidebar(windowId) {
+    const window = windows.find(w => w.id === windowId);
+    if (window) {
+      window.sidebarOpen = !window.sidebarOpen;
+    }
+  }
+
+  function removeFavorite(windowId, url) {
+    const window = windows.find(w => w.id === windowId);
+    if (window) {
+      window.favorites = window.favorites.filter(fav => fav.url !== url);
+    }
+  }
+
+  function openNewWindow(url = 'https://www.msn.com/') {
+    const newWindow = {
+      id: nextWindowId++,
+      windowPos: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
+      currentUrl: url,
+      inputUrl: url,
+      urlHistory: [url],
+      historyIndex: 0,
+      isMinimized: false,
+      isMaximized: false,
+      originalSize: { width: 600, height: 'auto' },
+      originalPos: { x: 100, y: 100 },
+      sidebarOpen: false,
+      favorites: [
+        { name: 'NextJS', url: 'https://nextjs.org' },
+        { name: 'HackClub', url: 'https://hackclub.com' }
+      ]
+    };
+    windows = [...windows, newWindow];
+
+    // Make the new window draggable
+    setTimeout(() => {
+      window.$(`.window[data-window-id="${newWindow.id}"]`).draggable({
+        handle: '.title-bar',
+        containment: 'document'
+      });
+    }, 50);
   }
 </script>
 
@@ -125,119 +193,124 @@
   <StarBackground />
 </div>
 
-{#if !isMinimized}
-  <div class="window"
-     class:maximized={isMaximized}
-     style="position: fixed; left: {windowPos.x}px; top: {windowPos.y}px; width: {isMaximized ? '100vw' : '600px'}; height: {isMaximized ? '100vh' : '400px'}; z-index: 2000;">
-  <div class="title-bar" role="button" tabindex="0" on:mousedown={isMaximized ? null : startDrag} on:mouseup={stopDrag}>
-    <div class="title-bar-text">
-      Microsoft Internet Explorer
-    </div>
-
-    <div class="title-bar-controls">
-      <button aria-label="Minimize" on:click={minimizeWindow}></button>
-      <button aria-label="Maximize" on:click={maximizeWindow}></button>
-      <button aria-label="Close" on:click={closeWindow}></button>
-    </div>
-  </div>
-  <div class="browser-toolbar">
-    <div class="nav-buttons">
-      <button class="nav-btn" on:click={() => window.location.reload()}>
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="4" width="8" height="8" fill="white" stroke="currentColor" stroke-width="1"/>
-          <path d="M6 5 L8 3 L10 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10 11 L8 13 L6 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M8 3 L8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M8 10 L8 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span class="nav-text">Refresh</span>
-      </button>
-      <button class="nav-btn" on:click={() => navigateToUrl('https://www.msn.com/')}>
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2 L3 6 L3 13 L6 13 L6 9 L10 9 L10 13 L13 13 L13 6 Z" fill="white" stroke="currentColor" stroke-width="1"/>
-          <rect x="6" y="11" width="4" height="2" fill="currentColor"/>
-        </svg>
-        <span class="nav-text">Home</span>
-      </button>
-      <button class="nav-btn" on:click={toggleSidebar}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32">
-          <polygon points="16,4 20,12 29,12 22,18 25,26 16,21 7,26 10,18 3,12 12,12"
-            fill="white"/>
-        </svg>
-
-
-        <span class="nav-text">Favorites</span>
-      </button>
-      <button class="nav-btn">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="8" cy="8" r="6" fill="white" stroke="currentColor" stroke-width="1"/>
-          <path d="M8 4 L8 8 L10 10" stroke="black" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M8 8 L8 12" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M8 4 A4 4 0 0 1 8 8" stroke="currentColor" stroke-width="1" fill="none"/>
-        </svg>
-        <span class="nav-text">History</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="address-bar">
-    <div class="address-label">Address:</div>
-    <input type="text" class="address-input" bind:value={inputUrl} on:keydown={(e) => { if (e.key === 'Enter') goToUrl(); }}>
-    <button class="go-btn" on:click={goToUrl}>Go</button>
-  </div>
-
-  <div class="browser-content" class:sidebar-open={sidebarOpen}>
-    {#if sidebarOpen}
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <span class="sidebar-title">Favorites</span>
+{#each windows as window (window.id)}
+  {#if !window.isMinimized}
+    <div class="window"
+       class:maximized={window.isMaximized}
+       data-window-id={window.id}
+       style="position: fixed; left: {window.windowPos.x}px; top: {window.windowPos.y}px; width: {window.isMaximized ? '100vw' : '600px'}; height: {window.isMaximized ? '100vh' : '400px'}; z-index: 2000;">
+    <div class="title-bar" role="button" tabindex="0">
+      <div class="title-bar-text">
+        Microsoft Internet Explorer
       </div>
-      <div class="favorites-list">
-        {#each favorites as favorite}
-        <div class="favorite-item" role="button" tabindex="0" on:click={() => navigateToUrl(favorite.url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigateToUrl(favorite.url); }}>
-          <span class="favorite-name">{favorite.name}</span>
-          <button class="remove-favorite-btn" on:click|stopPropagation={() => removeFavorite(favorite.url)} on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') removeFavorite(favorite.url); }} title="Remove favorite" aria-label="Remove {favorite.name} from favorites">×</button>
+
+      <div class="title-bar-controls">
+        <button aria-label="Minimize" on:click={() => minimizeWindow(window.id)}></button>
+        <button aria-label="Maximize" on:click={() => maximizeWindow(window.id)}></button>
+        <button aria-label="Close" on:click={() => closeWindow(window.id)}></button>
+      </div>
+    </div>
+    <div class="browser-toolbar">
+      <div class="nav-buttons">
+        <button class="nav-btn" on:click={() => window.location.reload()}>
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="8" height="8" fill="white" stroke="currentColor" stroke-width="1"/>
+            <path d="M6 5 L8 3 L10 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 11 L8 13 L6 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 3 L8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M8 10 L8 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-text">Refresh</span>
+        </button>
+        <button class="nav-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/')}>
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2 L3 6 L3 13 L6 13 L6 9 L10 9 L10 13 L13 13 L13 6 Z" fill="white" stroke="currentColor" stroke-width="1"/>
+            <rect x="6" y="11" width="4" height="2" fill="currentColor"/>
+          </svg>
+          <span class="nav-text">Home</span>
+        </button>
+        <button class="nav-btn" on:click={() => toggleSidebar(window.id)}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32">
+            <polygon points="16,4 20,12 29,12 22,18 25,26 16,21 7,26 10,18 3,12 12,12"
+              fill="white"/>
+          </svg>
+
+
+          <span class="nav-text">Favorites</span>
+        </button>
+        <button class="nav-btn">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="6" fill="white" stroke="currentColor" stroke-width="1"/>
+            <path d="M8 4 L8 8 L10 10" stroke="black" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path d="M8 8 L8 12" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M8 4 A4 4 0 0 1 8 8" stroke="currentColor" stroke-width="1" fill="none"/>
+          </svg>
+          <span class="nav-text">History</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="address-bar">
+      <div class="address-label">Address:</div>
+      <input type="text" class="address-input" bind:value={window.inputUrl} on:keydown={(e) => { if (e.key === 'Enter') goToUrl(window.id); }}>
+      <button class="go-btn" on:click={() => goToUrl(window.id)}>Go</button>
+    </div>
+
+    <div class="browser-content" class:sidebar-open={window.sidebarOpen}>
+      {#if window.sidebarOpen}
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Favorites</span>
         </div>
-        {/each}
+        <div class="favorites-list">
+          {#each window.favorites as favorite}
+          <div class="favorite-item" role="button" tabindex="0" on:click={() => navigateToUrl(window.id, favorite.url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigateToUrl(window.id, favorite.url); }}>
+            <span class="favorite-name">{favorite.name}</span>
+            <button class="remove-favorite-btn" on:click|stopPropagation={() => removeFavorite(window.id, favorite.url)} on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') removeFavorite(window.id, favorite.url); }} title="Remove favorite" aria-label="Remove {favorite.name} from favorites">×</button>
+          </div>
+          {/each}
+        </div>
+      </div>
+      {/if}
+      <div class="webpage-content">
+      {#if window.currentUrl === 'https://www.msn.com/'}
+        <div class="social-icons">
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
+          </a>
+          <a href="https://slack.com" target="_blank" rel="noopener noreferrer">
+            <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
+          </a>
+        </div>
+        <button class="projects-btn" on:click={() => window.location.href = '/projects'}>Projects</button>
+      {:else if window.currentUrl === 'https://www.msn.com/update'}
+        <div class="update-message">
+          No Updates Available
+        </div>
+      {:else}
+        <iframe
+          src={window.currentUrl}
+          class="web-iframe"
+          title="Web content"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        ></iframe>
+      {/if}
       </div>
     </div>
-    {/if}
-    <div class="webpage-content">
-    {#if currentUrl === 'https://www.msn.com/'}
-      <div class="social-icons">
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-          <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
-        </a>
-        <a href="https://slack.com" target="_blank" rel="noopener noreferrer">
-          <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
-        </a>
-      </div>
-      <button class="projects-btn" on:click={() => window.location.href = '/projects'}>Projects</button>
-    {:else}
-      <iframe
-        src={currentUrl}
-        class="web-iframe"
-        title="Web content"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      ></iframe>
-    {/if}
+
+    <div class="status-bar">
+      <span>Done</span>
+      <span>My Computer</span>
     </div>
   </div>
+  {/if}
+{/each}
 
-  <div class="status-bar">
-    <span>Done</span>
-    <span>My Computer</span>
-  </div>
-</div>
-{/if}
-
-<StartMenu />
+<StartMenu {openNewWindow} />
 
 <div class="time-display">
   {currentTime}
 </div>
-
-<svelte:window on:mousemove={drag} on:mouseup={stopDrag} />
 
 <style>
   .window {
@@ -250,8 +323,14 @@
   }
 
   .window.maximized {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
     border: none;
     box-shadow: none;
+    z-index: 3000 !important;
   }
 
   .title-bar {
@@ -426,6 +505,17 @@
 
   .projects-btn:hover {
     border: 2px inset #c0c0c0;
+  }
+
+  .update-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: #000;
+    font-weight: normal;
   }
 
   .web-iframe {
