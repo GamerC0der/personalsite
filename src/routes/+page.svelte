@@ -42,22 +42,13 @@
     updateTime();
     timeInterval = setInterval(updateTime, 1000);
 
-    // Initialize jQuery draggable for all windows
     setTimeout(() => {
-      console.log('Initializing draggable for windows');
-      console.log('Windows found:', window.$('.window').length);
       window.$('.window').each((i, el) => {
-        console.log('Setting up draggable for window:', el, 'has maximized class:', window.$(el).hasClass('maximized'));
         if (!window.$(el).hasClass('maximized')) {
-          console.log('Making window draggable');
           window.$(el).draggable({
             handle: '.title-bar',
-            containment: 'document',
-            start: function() { console.log('Drag started'); },
-            drag: function() { console.log('Dragging...'); },
-            stop: function() { console.log('Drag stopped'); }
+            containment: 'document'
           });
-          console.log('Draggable initialized for window');
         }
       });
     }, 100);
@@ -70,54 +61,66 @@
   });
 
   function minimizeWindow(windowId) {
-    // Remove the window from the array (close it)
-    windows = windows.filter(w => w.id !== windowId);
+    windows = windows.map(w =>
+      w.id === windowId
+        ? { ...w, isMinimized: true }
+        : w
+    );
   }
 
   function maximizeWindow(windowId) {
-    const window = windows.find(w => w.id === windowId);
-    if (window) {
-      if (!window.isMaximized) {
-        window.originalPos = { ...window.windowPos };
-        window.originalSize = { width: 600, height: 400 };
-        window.isMaximized = true;
-        window.windowPos = { x: 0, y: 0 };
-        // Disable dragging when maximized
-        setTimeout(() => {
-          window.$(`.window[data-window-id="${windowId}"]`).draggable('disable');
-        }, 50);
-      } else {
-        window.windowPos = { ...window.originalPos };
-        window.isMaximized = false;
-        // Re-enable dragging when restored
-        setTimeout(() => {
-          window.$(`.window[data-window-id="${windowId}"]`).draggable('enable');
-        }, 50);
+    windows = windows.map(w => {
+      if (w.id === windowId) {
+        if (!w.isMaximized) {
+          setTimeout(() => {
+            window.$(`.window[data-window-id="${windowId}"]`).draggable('disable');
+          }, 50);
+          return {
+            ...w,
+            originalPos: { ...w.windowPos },
+            originalSize: { width: 600, height: 400 },
+            isMaximized: true,
+            windowPos: { x: 0, y: 0 }
+          };
+        } else {
+          setTimeout(() => {
+            window.$(`.window[data-window-id="${windowId}"]`).draggable('enable');
+          }, 50);
+          return {
+            ...w,
+            windowPos: { ...w.originalPos },
+            isMaximized: false
+          };
+        }
       }
-    }
+      return w;
+    });
   }
 
   function closeWindow(windowId) {
-    const window = windows.find(w => w.id === windowId);
-    if (window) {
-      window.isMinimized = true;
-    }
+    windows = windows.filter(w => w.id !== windowId);
   }
 
   function navigateToUrl(windowId, url) {
-    const window = windows.find(w => w.id === windowId);
-    if (window) {
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
+    windows = windows.map(w => {
+      if (w.id === windowId) {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        const newUrlHistory = w.historyIndex < w.urlHistory.length - 1
+          ? w.urlHistory.slice(0, w.historyIndex + 1)
+          : [...w.urlHistory];
+        newUrlHistory.push(url);
+        return {
+          ...w,
+          currentUrl: url,
+          urlHistory: newUrlHistory,
+          historyIndex: newUrlHistory.length - 1,
+          inputUrl: url
+        };
       }
-      window.currentUrl = url;
-      if (window.historyIndex < window.urlHistory.length - 1) {
-        window.urlHistory = window.urlHistory.slice(0, window.historyIndex + 1);
-      }
-      window.urlHistory.push(url);
-      window.historyIndex = window.urlHistory.length - 1;
-      window.inputUrl = url;
-    }
+      return w;
+    });
   }
 
   function goToUrl(windowId) {
@@ -128,35 +131,51 @@
   }
 
   function goBack(windowId) {
-    const window = windows.find(w => w.id === windowId);
-    if (window && window.historyIndex > 0) {
-      window.historyIndex--;
-      window.currentUrl = window.urlHistory[window.historyIndex];
-      window.inputUrl = window.currentUrl;
-    }
+    windows = windows.map(w => {
+      if (w.id === windowId && w.historyIndex > 0) {
+        const newHistoryIndex = w.historyIndex - 1;
+        const newCurrentUrl = w.urlHistory[newHistoryIndex];
+        return {
+          ...w,
+          historyIndex: newHistoryIndex,
+          currentUrl: newCurrentUrl,
+          inputUrl: newCurrentUrl
+        };
+      }
+      return w;
+    });
   }
 
   function goForward(windowId) {
-    const window = windows.find(w => w.id === windowId);
-    if (window && window.historyIndex < window.urlHistory.length - 1) {
-      window.historyIndex++;
-      window.currentUrl = window.urlHistory[window.historyIndex];
-      window.inputUrl = window.currentUrl;
-    }
+    windows = windows.map(w => {
+      if (w.id === windowId && w.historyIndex < w.urlHistory.length - 1) {
+        const newHistoryIndex = w.historyIndex + 1;
+        const newCurrentUrl = w.urlHistory[newHistoryIndex];
+        return {
+          ...w,
+          historyIndex: newHistoryIndex,
+          currentUrl: newCurrentUrl,
+          inputUrl: newCurrentUrl
+        };
+      }
+      return w;
+    });
   }
 
   function toggleSidebar(windowId) {
-    const window = windows.find(w => w.id === windowId);
-    if (window) {
-      window.sidebarOpen = !window.sidebarOpen;
-    }
+    windows = windows.map(w =>
+      w.id === windowId
+        ? { ...w, sidebarOpen: !w.sidebarOpen }
+        : w
+    );
   }
 
   function removeFavorite(windowId, url) {
-    const window = windows.find(w => w.id === windowId);
-    if (window) {
-      window.favorites = window.favorites.filter(fav => fav.url !== url);
-    }
+    windows = windows.map(w =>
+      w.id === windowId
+        ? { ...w, favorites: w.favorites.filter(fav => fav.url !== url) }
+        : w
+    );
   }
 
   function openNewWindow(url = 'https://www.msn.com/') {
@@ -179,7 +198,6 @@
     };
     windows = [...windows, newWindow];
 
-    // Make the new window draggable
     setTimeout(() => {
       window.$(`.window[data-window-id="${newWindow.id}"]`).draggable({
         handle: '.title-bar',
