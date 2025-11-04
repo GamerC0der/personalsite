@@ -2,19 +2,34 @@
   import StarBackground from './StarBackground.svelte';
   import StartMenu from './StartMenu.svelte';
   import '../app.css';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
 
   let windowPos = { x: 0, y: 0 };
   let currentUrl = 'https://www.msn.com/';
   let inputUrl = 'https://www.msn.com/';
   let urlHistory = ['https://www.msn.com/'];
   let historyIndex = 0;
+  let currentTime = '';
 
   $: inputUrl = currentUrl;
+
+  let timeInterval;
+
+  function updateTime() {
+    currentTime = new Date().toLocaleTimeString();
+  }
 
   onMount(() => {
     windowPos.x = window.innerWidth / 2 - 300;
     windowPos.y = window.innerHeight / 2 - 200;
+    updateTime();
+    timeInterval = setInterval(updateTime, 1000);
+  });
+
+  onDestroy(() => {
+    if (timeInterval) {
+      clearInterval(timeInterval);
+    }
   });
   let isDragging = false;
   let dragOffset = { x: 0, y: 0 };
@@ -114,11 +129,41 @@
   </div>
   <div class="browser-toolbar">
     <div class="nav-buttons">
-      <button class="nav-btn" on:click={goBack} disabled={historyIndex <= 0}>&lt;</button>
-      <button class="nav-btn" on:click={goForward} disabled={historyIndex >= urlHistory.length - 1}>&gt;</button>
-      <button class="nav-btn">X</button>
-      <button class="nav-btn" on:click={() => window.location.reload()}>R</button>
-      <button class="nav-btn" on:click={() => navigateToUrl('https://www.msn.com/')}>H</button>
+      <button class="nav-btn" on:click={() => window.location.reload()}>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="8" height="8" fill="white" stroke="currentColor" stroke-width="1"/>
+          <path d="M6 5 L8 3 L10 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 11 L8 13 L6 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 3 L8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M8 10 L8 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-text">Refresh</span>
+      </button>
+      <button class="nav-btn" on:click={() => navigateToUrl('https://www.msn.com/')}>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2 L3 6 L3 13 L6 13 L6 9 L10 9 L10 13 L13 13 L13 6 Z" fill="white" stroke="currentColor" stroke-width="1"/>
+          <rect x="6" y="11" width="4" height="2" fill="currentColor"/>
+        </svg>
+        <span class="nav-text">Home</span>
+      </button>
+      <button class="nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32">
+          <polygon points="16,4 20,12 29,12 22,18 25,26 16,21 7,26 10,18 3,12 12,12"
+            fill="white"/>
+        </svg>
+        
+        
+        <span class="nav-text">Favorites</span>
+      </button>
+      <button class="nav-btn">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="6" fill="white" stroke="currentColor" stroke-width="1"/>
+          <path d="M8 4 L8 8 L10 10" stroke="black" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M8 8 L8 12" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M8 4 A4 4 0 0 1 8 8" stroke="currentColor" stroke-width="1" fill="none"/>
+        </svg>
+        <span class="nav-text">History</span>
+      </button>
     </div>
   </div>
 
@@ -157,6 +202,10 @@
 {/if}
 
 <StartMenu />
+
+<div class="time-display">
+  {currentTime}
+</div>
 
 <svelte:window on:mousemove={drag} on:mouseup={stopDrag} />
 
@@ -200,23 +249,60 @@
   }
 
   .nav-btn {
-    width: 22px;
-    height: 22px;
+    min-width: 60px;
+    height: 50px;
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     font-family: 'MS Sans Serif', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding: 3px 4px;
+    position: relative;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
   }
 
   .nav-btn:hover:not(:disabled) {
     border: 2px inset #c0c0c0;
   }
 
+  .nav-btn:active:not(:disabled) {
+    border: 2px inset #c0c0c0;
+  }
+
   .nav-btn:disabled {
+    opacity: 0.5;
+  }
+
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    margin-bottom: 1px;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  .nav-btn:disabled .nav-icon {
+    stroke: #808080;
+    fill: #808080;
+  }
+
+  .nav-text {
+    font-size: 11px;
+    font-weight: normal;
+    color: #000;
+    line-height: 1;
+    display: inline-block;
+  }
+
+  .nav-btn:disabled .nav-text {
     color: #808080;
   }
 
@@ -316,5 +402,19 @@
     width: 100%;
     height: 100%;
     border: none;
+  }
+
+  .time-display {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 4px 8px;
+    font-family: 'CustomFont', monospace;
+    font-size: 14px;
+    color: #000;
+    z-index: 10000;
+    white-space: nowrap;
   }
 </style>

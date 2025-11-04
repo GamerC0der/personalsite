@@ -18,7 +18,7 @@
       if (!programsItemHovered && !submenuHovered) {
         programsMenuOpen = false;
       }
-    }, 100); // 100ms delay to allow mouse to reach submenu
+    }, 100);
   }
   const items = [
     ['windows_update_large-2', 'Windows Update'],
