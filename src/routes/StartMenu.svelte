@@ -35,8 +35,10 @@
 
 <div class="bottom-bar">
   <button class="b" class:pressed={open} on:click={() => open = !open}>
-    <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Windows" class="i">
-    Start
+    <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Windows" class="i" />
+    <span style="display:flex; align-items:center; gap:6px;">
+      Start
+    </span>
   </button>
 </div>
 

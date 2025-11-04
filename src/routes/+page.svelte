@@ -38,6 +38,11 @@
   let isMaximized = false;
   let originalSize = { width: 600, height: 'auto' };
   let originalPos = { x: 100, y: 100 };
+  let sidebarOpen = false;
+  let favorites = [
+    { name: 'NextJS', url: 'https://nextjs.org' },
+    { name: 'HackClub', url: 'https://hackclub.com' }
+  ];
 
   function startDrag(event) {
     isDragging = true;
@@ -106,6 +111,14 @@
       currentUrl = urlHistory[historyIndex];
     }
   }
+
+  function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+  }
+
+  function removeFavorite(url) {
+    favorites = favorites.filter(fav => fav.url !== url);
+  }
 </script>
 
 <div style="background-color: black; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
@@ -146,13 +159,13 @@
         </svg>
         <span class="nav-text">Home</span>
       </button>
-      <button class="nav-btn">
+      <button class="nav-btn" on:click={toggleSidebar}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32">
           <polygon points="16,4 20,12 29,12 22,18 25,26 16,21 7,26 10,18 3,12 12,12"
             fill="white"/>
         </svg>
-        
-        
+
+
         <span class="nav-text">Favorites</span>
       </button>
       <button class="nav-btn">
@@ -173,7 +186,23 @@
     <button class="go-btn" on:click={goToUrl}>Go</button>
   </div>
 
-  <div class="webpage-content">
+  <div class="browser-content" class:sidebar-open={sidebarOpen}>
+    {#if sidebarOpen}
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Favorites</span>
+      </div>
+      <div class="favorites-list">
+        {#each favorites as favorite}
+        <div class="favorite-item" role="button" tabindex="0" on:click={() => navigateToUrl(favorite.url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigateToUrl(favorite.url); }}>
+          <span class="favorite-name">{favorite.name}</span>
+          <button class="remove-favorite-btn" on:click|stopPropagation={() => removeFavorite(favorite.url)} on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') removeFavorite(favorite.url); }} title="Remove favorite" aria-label="Remove {favorite.name} from favorites">×</button>
+        </div>
+        {/each}
+      </div>
+    </div>
+    {/if}
+    <div class="webpage-content">
     {#if currentUrl === 'https://www.msn.com/'}
       <div class="social-icons">
         <a href="https://github.com" target="_blank" rel="noopener noreferrer">
@@ -192,6 +221,7 @@
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       ></iframe>
     {/if}
+    </div>
   </div>
 
   <div class="status-bar">
@@ -416,5 +446,88 @@
     color: #000;
     z-index: 10000;
     white-space: nowrap;
+  }
+
+  .browser-content {
+    flex: 1;
+    display: flex;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar {
+    width: 200px;
+    background: #c0c0c0;
+    border-right: 2px inset #c0c0c0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    background: #c0c0c0;
+    border-bottom: 2px inset #c0c0c0;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .sidebar-title {
+    color: #000;
+  }
+
+
+  .favorites-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .favorite-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    border-bottom: 1px solid #808080;
+  }
+
+  .favorite-item:hover {
+    background: #000080;
+    color: white;
+  }
+
+  .favorite-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .remove-favorite-btn {
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+  }
+
+  .favorite-item:hover .remove-favorite-btn {
+    color: white;
+  }
+
+  .remove-favorite-btn:hover {
+    background: #ff0000;
+    color: white;
   }
 </style>
