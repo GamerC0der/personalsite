@@ -3,6 +3,7 @@
   const dispatch = createEventDispatcher();
 
   export let openNewWindow;
+  export let openRunMenu;
 
   let open = false;
   let programsMenuOpen = false;
@@ -68,6 +69,9 @@
             } else if (text === 'Windows Update') {
               openNewWindow('https://www.msn.com/update');
               open = false;
+            } else if (text === 'Run...') {
+              openRunMenu();
+              open = false;
             } else {
               open = false;
             }
@@ -77,6 +81,9 @@
               window.location.reload();
             } else if (text === 'Windows Update') {
               openNewWindow('https://www.msn.com/update');
+              open = false;
+            } else if (text === 'Run...') {
+              openRunMenu();
               open = false;
             } else {
               open = false;

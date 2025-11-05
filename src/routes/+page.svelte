@@ -66,6 +66,10 @@
   let currentTime = '';
   let nextWindowId = 2;
 
+  let runMenuOpen = false;
+  let runWindowPos = { x: 100, y: 100 };
+  let runCommand = '';
+
   let timeInterval;
 
   function updateTime() {
@@ -90,6 +94,10 @@
             containment: 'document'
           });
         }
+      });
+      window.$('.run-window').draggable({
+        handle: '.title-bar',
+        containment: 'document'
       });
     }, 100);
   });
@@ -218,6 +226,53 @@
     );
   }
 
+  function toggleRunMenu() {
+    runMenuOpen = !runMenuOpen;
+    if (runMenuOpen) {
+      runCommand = '';
+      setTimeout(() => {
+        window.$('.run-window').draggable({
+          handle: '.title-bar',
+          containment: 'document'
+        });
+      }, 50);
+    }
+  }
+
+  function executeRunCommand() {
+    const command = runCommand.trim().toLowerCase();
+    if (!command) return;
+
+    switch (command) {
+      case 'help':
+        alert(`Available commands:
+• help - Show this help
+• time - Show current time
+• user - Show current user
+• logout - Log out and restart`);
+        break;
+      case 'time':
+        alert(`Current time: ${new Date().toLocaleString()}`);
+        break;
+      case 'user':
+        alert('Current user: Guest');
+        break;
+      case 'logout':
+        if (confirm('Are you sure you want to log out?')) {
+          window.location.reload();
+        }
+        break;
+      default:
+        alert(`Unknown command: ${command}. Type 'help' for available commands.`);
+        break;
+    }
+
+    runCommand = '';
+    if (command !== 'help' && command !== 'time' && command !== 'user') {
+      runMenuOpen = false;
+    }
+  }
+
   function openNewWindow(url = 'https://www.msn.com/') {
     const newWindow = {
       id: nextWindowId++,
@@ -296,7 +351,7 @@
 
           <span class="nav-text">Favorites</span>
         </button>
-        <button class="nav-btn">
+        <button class="nav-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/history')}>
           <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="8" cy="8" r="6" fill="white" stroke="currentColor" stroke-width="1"/>
             <path d="M8 4 L8 8 L10 10" stroke="black" stroke-width="1.5" stroke-linecap="round" fill="none"/>
@@ -397,7 +452,30 @@
   {/if}
 {/each}
 
-<StartMenu {openNewWindow} />
+{#if runMenuOpen}
+<div class="run-window" style="position: fixed; left: {runWindowPos.x}px; top: {runWindowPos.y}px;">
+  <div class="title-bar">
+    <div class="title-bar-text">Run</div>
+    <div class="title-bar-controls">
+      <button aria-label="Help">?</button>
+      <button aria-label="Close" on:click={toggleRunMenu}></button>
+    </div>
+  </div>
+  <div class="run-content">
+    <div class="run-label">Type the name of a program, folder, document, or Internet resource, and Windows will open it for you.</div>
+    <div class="run-input-container">
+      <label class="run-input-label" for="run-input-field">Open:</label>
+      <input type="text" class="run-input" id="run-input-field" placeholder="Type here..." bind:value={runCommand} on:keydown={(e) => { if (e.key === 'Enter') executeRunCommand(); }}>
+    </div>
+    <div class="run-buttons">
+      <button class="run-ok-btn" on:click={executeRunCommand}>OK</button>
+      <button class="run-cancel-btn" on:click={toggleRunMenu}>Cancel</button>
+    </div>
+  </div>
+</div>
+{/if}
+
+<StartMenu {openNewWindow} openRunMenu={toggleRunMenu} />
 
 <div class="time-display">
   {currentTime}
@@ -811,5 +889,76 @@
     font-size: 12px;
     color: #000;
     padding: 20px;
+  }
+
+  .run-window {
+    background: #c0c0c0;
+    border: 2px solid black;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    z-index: 2000;
+  }
+
+
+  .run-content {
+    padding: 16px;
+  }
+
+  .run-label {
+    font-family: 'CustomFont', monospace;
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 12px;
+  }
+
+  .run-input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .run-input-label {
+    font-family: 'CustomFont', monospace;
+    font-size: 12px;
+    color: #000;
+    margin-right: 8px;
+    width: 40px;
+  }
+
+  .run-input {
+    flex: 1;
+    padding: 2px 4px;
+    border: 2px inset #c0c0c0;
+    background: white;
+    font-family: 'CustomFont', monospace;
+    font-size: 12px;
+  }
+
+  .run-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .run-ok-btn,
+  .run-cancel-btn {
+    padding: 4px 12px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    font-family: 'CustomFont', monospace;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .run-ok-btn:hover,
+  .run-cancel-btn:hover {
+    border: 2px inset #c0c0c0;
+  }
+
+  .title-bar-controls button:first-child {
+    cursor: help;
   }
 </style>
