@@ -357,7 +357,7 @@
           {:else}
             <div class="projects-grid">
               {#each filteredProjects as project}
-                <div class="project-card" on:click={() => navigateToUrl(window.id, project.html_url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateToUrl(window.id, project.html_url); }}} role="button" tabindex="0">
+                <a class="project-card" href={project.html_url} target="_blank" rel="noopener noreferrer">
                   <h3 class="project-name">{project.name}</h3>
                   <p class="project-description">{project.description || 'No description available'}</p>
                   <div class="project-meta">
@@ -366,7 +366,7 @@
                     {/if}
                   </div>
                   <div class="project-updated">Updated {new Date(project.updated_at).toLocaleDateString()}</div>
-                </div>
+                </a>
               {/each}
             </div>
             {#if filteredProjects.length === 0 && !isLoading}
