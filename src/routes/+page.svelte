@@ -4,6 +4,45 @@
   import '../app.css';
   import { onMount, onDestroy } from 'svelte';
 
+  let projects = [];
+  let filteredProjects = [];
+  let searchQuery = '';
+  let isLoading = false;
+
+  async function fetchProjects() {
+    isLoading = true;
+    try {
+      const response = await fetch('https://api.github.com/users/gamerc0der/repos?sort=updated&per_page=100');
+      if (response.ok) {
+        projects = await response.json();
+        updateFilteredProjects();
+      } else {
+        console.error('Failed to fetch projects:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  function updateFilteredProjects() {
+    if (!searchQuery.trim()) {
+      filteredProjects = [...projects].slice(0, 5);
+    } else {
+      const query = searchQuery.toLowerCase();
+      filteredProjects = projects.filter(project =>
+        project.name.toLowerCase().includes(query) ||
+        (project.description && project.description.toLowerCase().includes(query)) ||
+        project.language?.toLowerCase().includes(query)
+      );
+    }
+  }
+
+  $: if (searchQuery !== undefined) {
+    updateFilteredProjects();
+  }
+
   let windows = [
     {
       id: 1,
@@ -41,6 +80,7 @@
     windows[0].windowPos.y = window.innerHeight / 2 - 200;
     updateTime();
     timeInterval = setInterval(updateTime, 1000);
+    fetchProjects();
 
     setTimeout(() => {
       window.$('.window').each((i, el) => {
@@ -300,7 +340,40 @@
             <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
           </a>
         </div>
-        <button class="projects-btn" on:click={() => window.location.href = '/projects'}>Projects</button>
+        <button class="projects-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/projects')}>Projects</button>
+      {:else if window.currentUrl === 'https://www.msn.com/projects'}
+        <div class="projects-page">
+          <h1 class="projects-title">My Projects</h1>
+          <div class="search-container">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search projects..."
+              bind:value={searchQuery}
+            />
+          </div>
+          {#if isLoading}
+            <div class="loading">Loading projects...</div>
+          {:else}
+            <div class="projects-grid">
+              {#each filteredProjects as project}
+                <div class="project-card" on:click={() => navigateToUrl(window.id, project.html_url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateToUrl(window.id, project.html_url); }}} role="button" tabindex="0">
+                  <h3 class="project-name">{project.name}</h3>
+                  <p class="project-description">{project.description || 'No description available'}</p>
+                  <div class="project-meta">
+                    {#if project.language}
+                      <span class="project-language">{project.language}</span>
+                    {/if}
+                  </div>
+                  <div class="project-updated">Updated {new Date(project.updated_at).toLocaleDateString()}</div>
+                </div>
+              {/each}
+            </div>
+            {#if filteredProjects.length === 0 && !isLoading}
+              <div class="no-results">No projects found matching your search.</div>
+            {/if}
+          {/if}
+        </div>
       {:else if window.currentUrl === 'https://www.msn.com/update'}
         <div class="update-message">
           No Updates Available
@@ -637,5 +710,106 @@
   .remove-favorite-btn:hover {
     background: #ff0000;
     color: white;
+  }
+
+  .projects-page {
+    padding: 10px;
+  }
+
+  .projects-title {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+  }
+
+  .search-container {
+    margin-bottom: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 3px 4px;
+    border: 1px inset #c0c0c0;
+    background: white;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+  }
+
+  .loading {
+    text-align: center;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+    padding: 20px;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px inset #c0c0c0;
+    background: white;
+    padding: 8px;
+  }
+
+  .project-card {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    padding: 8px;
+    cursor: pointer;
+    font-family: 'MS Sans Serif', sans-serif;
+  }
+
+  .project-card:hover {
+    background: #d0d0d0;
+  }
+
+  .project-name {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+    color: #000;
+  }
+
+  .project-description {
+    font-size: 12px;
+    color: #000;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .project-meta {
+    font-size: 11px;
+    color: #000;
+  }
+
+  .project-language {
+    background: #008000;
+    color: white;
+    padding: 1px 4px;
+    font-weight: bold;
+  }
+
+
+  .project-updated {
+    font-size: 11px;
+    color: #666;
+  }
+
+  .no-results {
+    text-align: center;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+    padding: 20px;
   }
 </style>
