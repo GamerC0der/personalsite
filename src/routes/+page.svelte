@@ -62,7 +62,7 @@
       sidebarOpen: false,
       historySearchQuery: '',
       favorites: [
-        { name: 'NextJS', url: 'https://nextjs.org' },
+        { name: 'Github', url: 'https://github.com/gamerc0der' },
         { name: 'HackClub', url: 'https://hackclub.com' }
       ]
     }
@@ -300,6 +300,7 @@
 
   function openNewWindow(url = 'https://www.msn.com/') {
     const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
+    const isMinesweeper = url === 'https://98plus.js.org/programs/minesweeper/index.html';
     const newWindow = {
       id: nextWindowId++,
       windowPos: { x: 0, y: 0 },
@@ -308,15 +309,16 @@
       urlHistory: [url],
       historyIndex: 0,
       isMinimized: false,
-      isMaximized: true,
-      originalSize: { width: '100vw', height: 'calc(100vh - 42px)' },
+      isMaximized: isPinball,
+      originalSize: (isPinball || isMinesweeper) ? { width: '100vw', height: 'calc(100vh - 42px)' } : { width: 600, height: 'auto' },
       originalPos: { x: 0, y: 0 },
       sidebarOpen: false,
       historySearchQuery: '',
       isPinball: isPinball,
-      isFullscreenGame: isPinball,
+      isFullscreenGame: isPinball || isMinesweeper,
+      isMinesweeper: isMinesweeper,
       favorites: [
-        { name: 'NextJS', url: 'https://nextjs.org' },
+        { name: 'Github', url: 'https://github.com/gamerc0der' },
         { name: 'HackClub', url: 'https://hackclub.com' }
       ]
     };
@@ -346,6 +348,8 @@
       <div class="title-bar-text">
         {#if window.isPinball}
           Space Cadet Pinball 3D
+        {:else if window.isMinesweeper}
+          Minesweeper
         {:else}
           Microsoft Internet Explorer
         {/if}
@@ -423,7 +427,7 @@
         </div>
       </div>
       {/if}
-      <div class="webpage-content">
+      <div class="webpage-content" class:fullscreen-game-content={window.isFullscreenGame}>
       {#if window.currentUrl === 'https://www.msn.com/about'}
         <div class="about-page">
           <h1 class="about-title">About This Website</h1>
@@ -541,7 +545,7 @@
           class="web-iframe"
           class:fullscreen-iframe={window.isFullscreenGame}
           title="Web content"
-          sandbox={window.isPinball ? "allow-scripts" : "allow-scripts allow-same-origin allow-forms allow-popups"}
+          sandbox={window.isFullscreenGame ? "allow-scripts" : "allow-scripts allow-same-origin allow-forms allow-popups"}
         ></iframe>
       {/if}
       </div>
@@ -753,6 +757,10 @@
     overflow-y: auto;
   }
 
+  .webpage-content.fullscreen-game-content {
+    padding: 0;
+  }
+
   .status-bar {
     background: #c0c0c0;
     border-top: 2px inset #c0c0c0;
@@ -946,7 +954,7 @@
 
   .fullscreen-iframe {
     width: 100%;
-    height: calc(100vh - 42px - 24px);
+    height: calc(37.5vh - 42px - 24px);
   }
 
   .time-display {
@@ -1067,6 +1075,7 @@
     padding: 3px 4px;
     border: 1px inset #c0c0c0;
     background: white;
+    color: #000;
     font-family: 'MS Sans Serif', sans-serif;
     font-size: 12px;
   }
