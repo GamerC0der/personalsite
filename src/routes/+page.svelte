@@ -27,11 +27,15 @@
   }
 
   function updateFilteredProjects() {
+    const nonAiProjects = projects.filter(project =>
+      !project.name.toLowerCase().includes('ai')
+    );
+
     if (!searchQuery.trim()) {
-      filteredProjects = [...projects].slice(0, 5);
+      filteredProjects = [...nonAiProjects].slice(0, 5);
     } else {
       const query = searchQuery.toLowerCase();
-      filteredProjects = projects.filter(project =>
+      filteredProjects = nonAiProjects.filter(project =>
         project.name.toLowerCase().includes(query) ||
         (project.description && project.description.toLowerCase().includes(query)) ||
         project.language?.toLowerCase().includes(query)
@@ -56,6 +60,7 @@
       originalSize: { width: 600, height: 'auto' },
       originalPos: { x: 100, y: 100 },
       sidebarOpen: false,
+      historySearchQuery: '',
       favorites: [
         { name: 'NextJS', url: 'https://nextjs.org' },
         { name: 'HackClub', url: 'https://hackclub.com' }
@@ -69,6 +74,9 @@
   let runMenuOpen = false;
   let runWindowPos = { x: 100, y: 100 };
   let runCommand = '';
+
+  let messageWindows = [];
+  let nextMessageWindowId = 1;
 
   let timeInterval;
 
@@ -230,13 +238,36 @@
     runMenuOpen = !runMenuOpen;
     if (runMenuOpen) {
       runCommand = '';
-      setTimeout(() => {
-        window.$('.run-window').draggable({
-          handle: '.title-bar',
-          containment: 'document'
-        });
-      }, 50);
-    }
+    setTimeout(() => {
+      window.$('.run-window').draggable({
+        handle: '.title-bar',
+        containment: 'document'
+      });
+    }, 50);
+  }
+  }
+
+  function openMessageWindow(message, title = 'Message') {
+    const offset = messageWindows.length * 30;
+    const newMessageWindow = {
+      id: nextMessageWindowId++,
+      title,
+      message,
+      windowPos: { x: Math.random() * 200 + 150 + offset, y: Math.random() * 150 + 100 + offset },
+      isMinimized: false
+    };
+    messageWindows = [...messageWindows, newMessageWindow];
+
+    setTimeout(() => {
+      window.$(`.message-window[data-window-id="${newMessageWindow.id}"]`).draggable({
+        handle: '.title-bar',
+        containment: 'document'
+      });
+    }, 50);
+  }
+
+  function closeMessageWindow(windowId) {
+    messageWindows = messageWindows.filter(w => w.id !== windowId);
   }
 
   function executeRunCommand() {
@@ -245,25 +276,19 @@
 
     switch (command) {
       case 'help':
-        alert(`Available commands:
-• help - Show this help
-• time - Show current time
-• user - Show current user
-• logout - Log out and restart`);
+        openNewWindow('https://www.msn.com/about');
         break;
       case 'time':
-        alert(`Current time: ${new Date().toLocaleString()}`);
+        openMessageWindow(`Current time: ${new Date().toLocaleString()}`, 'Alert');
         break;
       case 'user':
-        alert('Current user: Guest');
+        openMessageWindow('Current user: Guest', 'Alert');
         break;
       case 'logout':
-        if (confirm('Are you sure you want to log out?')) {
-          window.location.reload();
-        }
+        openMessageWindow('Are you sure you want to log out?', 'Alert');
         break;
       default:
-        alert(`Unknown command: ${command}. Type 'help' for available commands.`);
+        openMessageWindow(`Unknown command: ${command}. Type 'help' for available commands.`, 'Alert');
         break;
     }
 
@@ -286,6 +311,7 @@
       originalSize: { width: 600, height: 'auto' },
       originalPos: { x: 100, y: 100 },
       sidebarOpen: false,
+      historySearchQuery: '',
       favorites: [
         { name: 'NextJS', url: 'https://nextjs.org' },
         { name: 'HackClub', url: 'https://hackclub.com' }
@@ -386,7 +412,15 @@
       </div>
       {/if}
       <div class="webpage-content">
-      {#if window.currentUrl === 'https://www.msn.com/'}
+      {#if window.currentUrl === 'https://www.msn.com/about'}
+        <div class="about-page">
+          <h1 class="about-title">About This Website</h1>
+          <div class="about-content">
+            <button class="about-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/')}>Profile</button>
+            <button class="about-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/projects')}>Projects</button>
+          </div>
+        </div>
+      {:else if window.currentUrl === 'https://www.msn.com/'}
         <div class="social-icons">
           <a href="https://github.com" target="_blank" rel="noopener noreferrer">
             <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
@@ -433,6 +467,62 @@
         <div class="update-message">
           No Updates Available
         </div>
+      {:else if window.currentUrl === 'https://www.msn.com/history'}
+        <div class="history-page">
+          <h1 class="history-title">Browsing History</h1>
+          <div class="search-container">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search history..."
+              bind:value={window.historySearchQuery}
+            />
+          </div>
+          <div class="history-content">
+            {#if window.urlHistory.length > 0}
+              {@const filteredHistory = window.urlHistory.filter(url => url.toLowerCase().includes(window.historySearchQuery.toLowerCase()))}
+              {#if filteredHistory.length > 0}
+                <div class="history-list">
+                  {#each filteredHistory as url}
+                    {@const originalIndex = window.urlHistory.indexOf(url)}
+                    <div class="history-item {originalIndex === window.historyIndex ? 'current' : ''}" role="button" tabindex="0" on:click={() => navigateToUrl(window.id, url)} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigateToUrl(window.id, url); }}>
+                      <span class="history-url">{url}</span>
+                      {#if originalIndex === window.historyIndex}
+                        <span class="current-indicator">(Current)</span>
+                      {/if}
+                    </div>
+                  {/each}
+                </div>
+              {:else}
+                <div class="no-history">No history items match your search.</div>
+              {/if}
+            {:else}
+              <div class="no-history">No browsing history available.</div>
+            {/if}
+          </div>
+        </div>
+      {:else if window.currentUrl === '/help'}
+        <div class="help-page">
+          <h1 class="help-title">Help Documentation</h1>
+          <div class="help-content">
+            <h2>Getting Started</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+            <h2>Available Commands</h2>
+            <ul>
+              <li><strong>help</strong> - Display this help documentation</li>
+              <li><strong>time</strong> - Show the current date and time</li>
+              <li><strong>user</strong> - Display current user information</li>
+              <li><strong>logout</strong> - Log out and restart the system</li>
+            </ul>
+
+            <h2>Navigation</h2>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+            <h2>Troubleshooting</h2>
+            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+          </div>
+        </div>
       {:else}
         <iframe
           src={window.currentUrl}
@@ -457,7 +547,6 @@
   <div class="title-bar">
     <div class="title-bar-text">Run</div>
     <div class="title-bar-controls">
-      <button aria-label="Help">?</button>
       <button aria-label="Close" on:click={toggleRunMenu}></button>
     </div>
   </div>
@@ -474,6 +563,22 @@
   </div>
 </div>
 {/if}
+
+{#each messageWindows as messageWindow (messageWindow.id)}
+  {#if !messageWindow.isMinimized}
+    <div class="message-window" data-window-id={messageWindow.id} style="position: fixed; left: {messageWindow.windowPos.x}px; top: {messageWindow.windowPos.y}px;">
+      <div class="title-bar">
+        <div class="title-bar-text">{messageWindow.title}</div>
+        <div class="title-bar-controls">
+          <button aria-label="Close" on:click={() => closeMessageWindow(messageWindow.id)}></button>
+        </div>
+      </div>
+      <div class="message-content">
+        <div class="message-text">{messageWindow.message}</div>
+      </div>
+    </div>
+  {/if}
+{/each}
 
 <StartMenu {openNewWindow} openRunMenu={toggleRunMenu} />
 
@@ -676,6 +781,34 @@
     border: 2px inset #c0c0c0;
   }
 
+  .about-page {
+    padding: 20px;
+    font-family: 'MS Sans Serif', sans-serif;
+    color: #000;
+  }
+
+  .about-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+  }
+
+  .about-btn {
+    padding: 8px 16px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 5px;
+  }
+
+  .about-btn:hover {
+    border: 2px inset #c0c0c0;
+  }
+
+
   .update-message {
     display: flex;
     align-items: center;
@@ -685,6 +818,109 @@
     font-size: 16px;
     color: #000;
     font-weight: normal;
+  }
+
+  .help-page {
+    padding: 20px;
+    font-family: 'MS Sans Serif', sans-serif;
+    color: #000;
+  }
+
+  .help-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+  }
+
+  .help-content h2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #000;
+  }
+
+  .help-content p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: #000;
+  }
+
+  .help-content ul {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: #000;
+  }
+
+  .help-content li {
+    margin-bottom: 5px;
+  }
+
+  .history-page {
+    padding: 20px;
+    font-family: 'MS Sans Serif', sans-serif;
+    color: #000;
+  }
+
+  .history-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+  }
+
+  .history-content {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .history-list {
+    border: 1px inset #c0c0c0;
+    background: white;
+  }
+
+  .history-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #c0c0c0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+  }
+
+  .history-item:hover {
+    background: #e0e0e0;
+  }
+
+  .history-item.current {
+    background: #000080;
+    color: white;
+  }
+
+  .history-url {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .current-indicator {
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffff00;
+  }
+
+  .no-history {
+    text-align: center;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 14px;
+    color: #666;
+    padding: 40px;
   }
 
   .web-iframe {
@@ -908,7 +1144,7 @@
   }
 
   .run-label {
-    font-family: 'CustomFont', monospace;
+    font-family: 'MS Sans Serif', sans-serif;
     font-size: 14px;
     color: #000;
     margin-bottom: 12px;
@@ -921,7 +1157,7 @@
   }
 
   .run-input-label {
-    font-family: 'CustomFont', monospace;
+    font-family: 'MS Sans Serif', sans-serif;
     font-size: 12px;
     color: #000;
     margin-right: 8px;
@@ -933,7 +1169,7 @@
     padding: 2px 4px;
     border: 2px inset #c0c0c0;
     background: white;
-    font-family: 'CustomFont', monospace;
+    font-family: 'MS Sans Serif', sans-serif;
     font-size: 12px;
   }
 
@@ -948,7 +1184,7 @@
     padding: 4px 12px;
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
-    font-family: 'CustomFont', monospace;
+    font-family: 'MS Sans Serif', sans-serif;
     font-size: 12px;
     cursor: pointer;
   }
@@ -958,7 +1194,32 @@
     border: 2px inset #c0c0c0;
   }
 
-  .title-bar-controls button:first-child {
-    cursor: help;
+  .message-window {
+    background: #c0c0c0;
+    border: 2px solid black;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    z-index: 2000;
   }
+
+  .message-content {
+    padding: 16px;
+    border: 2px inset #c0c0c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+  }
+
+  .message-text {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+    text-align: center;
+    line-height: 1.4;
+  }
+
 </style>
