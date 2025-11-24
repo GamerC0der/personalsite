@@ -187,7 +187,7 @@
     right: 0;
     height: 42px;
     background: rgb(195, 198, 200);
-    z-index: 999;
+    z-index: 3000;
   }
   .b {
     position: absolute;
@@ -231,7 +231,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 998;
+    z-index: 2999;
   }
   .m {
     position: fixed;
@@ -241,7 +241,7 @@
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 3001;
   }
   .h {
     background: linear-gradient(to right, #000080, #1084d0);
@@ -296,19 +296,19 @@
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
+    z-index: 3002;
     padding: 2px 0;
   }
   .games-submenu {
     position: fixed;
-    bottom: 265px;
+    bottom: 210px;
     left: calc(0.7% + 196px);
     width: 120px;
     min-height: 80px;
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
+    z-index: 3002;
     padding: 2px 0;
   }
 

@@ -78,6 +78,13 @@
   let messageWindows = [];
   let nextMessageWindowId = 1;
 
+  let contextMenu = {
+    visible: false,
+    x: 0,
+    y: 0,
+    target: null
+  };
+
   let timeInterval;
 
   function updateTime() {
@@ -108,11 +115,19 @@
         containment: 'document'
       });
     }, 100);
+
+    // Add right-click context menu
+    document.addEventListener('contextmenu', showContextMenu);
+    document.addEventListener('click', hideContextMenu);
   });
 
   onDestroy(() => {
     if (timeInterval) {
       clearInterval(timeInterval);
+    }
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('contextmenu', showContextMenu);
+      document.removeEventListener('click', hideContextMenu);
     }
   });
 
@@ -234,6 +249,48 @@
     );
   }
 
+  function showContextMenu(event) {
+    event.preventDefault();
+    contextMenu.visible = true;
+    contextMenu.x = event.clientX;
+    contextMenu.y = event.clientY;
+    contextMenu.target = event.target;
+  }
+
+  function hideContextMenu() {
+    contextMenu.visible = false;
+  }
+
+  function handleContextMenuAction(action) {
+    switch (action) {
+      case 'refresh':
+        window.location.reload();
+        break;
+      case 'close':
+        if (contextMenu.target && contextMenu.target.closest('.window')) {
+          const windowEl = contextMenu.target.closest('.window');
+          const windowId = parseInt(windowEl.getAttribute('data-window-id'));
+          closeWindow(windowId);
+        }
+        break;
+      case 'minimize':
+        if (contextMenu.target && contextMenu.target.closest('.window')) {
+          const windowEl = contextMenu.target.closest('.window');
+          const windowId = parseInt(windowEl.getAttribute('data-window-id'));
+          minimizeWindow(windowId);
+        }
+        break;
+      case 'maximize':
+        if (contextMenu.target && contextMenu.target.closest('.window')) {
+          const windowEl = contextMenu.target.closest('.window');
+          const windowId = parseInt(windowEl.getAttribute('data-window-id'));
+          maximizeWindow(windowId);
+        }
+        break;
+    }
+    hideContextMenu();
+  }
+
   function toggleRunMenu() {
     runMenuOpen = !runMenuOpen;
     if (runMenuOpen) {
@@ -340,6 +397,63 @@
   <StarBackground />
 </div>
 
+{#if contextMenu.visible}
+  <div
+    class="context-menu"
+    style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
+    role="menu"
+    tabindex="-1"
+    on:click|stopPropagation={() => {}}
+    on:keydown={(e) => {
+      if (e.key === 'Escape') hideContextMenu();
+    }}
+  >
+    <div
+      class="context-menu-item"
+      role="menuitem"
+      tabindex="0"
+      on:click={() => handleContextMenuAction('refresh')}
+      on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('refresh'); }}
+    >
+      <span class="context-menu-icon">🔄</span>
+      Refresh
+    </div>
+    {#if contextMenu.target && contextMenu.target.closest('.window')}
+      <div class="context-menu-separator"></div>
+      <div
+        class="context-menu-item"
+        role="menuitem"
+        tabindex="0"
+        on:click={() => handleContextMenuAction('minimize')}
+        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('minimize'); }}
+      >
+        <span class="context-menu-icon">_</span>
+        Minimize
+      </div>
+      <div
+        class="context-menu-item"
+        role="menuitem"
+        tabindex="0"
+        on:click={() => handleContextMenuAction('maximize')}
+        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('maximize'); }}
+      >
+        <span class="context-menu-icon">⬜</span>
+        Maximize
+      </div>
+      <div
+        class="context-menu-item"
+        role="menuitem"
+        tabindex="0"
+        on:click={() => handleContextMenuAction('close')}
+        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('close'); }}
+      >
+        <span class="context-menu-icon">✕</span>
+        Close
+      </div>
+    {/if}
+  </div>
+{/if}
+
 {#each windows as window (window.id)}
   {#if !window.isMinimized}
     <div class="window"
@@ -432,7 +546,7 @@
         </div>
       </div>
       {/if}
-      <div class="webpage-content" class:fullscreen-game-content={window.isFullscreenGame}>
+      <div class="webpage-content" class:fullscreen-game-content={window.isFullscreenGame || window.isCommandPrompt}>
       {#if window.currentUrl === 'https://www.msn.com/about'}
         <div class="about-page">
           <h1 class="about-title">About This Website</h1>
@@ -551,7 +665,8 @@
           src={window.currentUrl}
           class="web-iframe"
           title="Web content"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          tabindex="0"
+          sandbox={window.isCommandPrompt ? "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-pointer-lock allow-top-navigation" : "allow-scripts allow-same-origin allow-forms allow-popups"}
         ></iframe>
       {/if}
       </div>
@@ -1272,6 +1387,46 @@
     margin-right: auto;
     line-height: 1.4;
     letter-spacing: -0.5px;
+  }
+
+  .context-menu {
+    position: fixed;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    min-width: 120px;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    padding: 2px 0;
+  }
+
+  .context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    color: #000;
+    user-select: none;
+  }
+
+  .context-menu-item:hover {
+    background: #000080;
+    color: #fff;
+  }
+
+  .context-menu-icon {
+    width: 16px;
+    text-align: center;
+    font-size: 10px;
+  }
+
+  .context-menu-separator {
+    height: 1px;
+    background: #808080;
+    margin: 4px 2px;
+    border-bottom: 1px solid #fff;
   }
 
 </style>
