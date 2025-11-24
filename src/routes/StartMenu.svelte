@@ -147,6 +147,10 @@
       on:mouseenter={() => { submenuHovered = true; updateProgramsMenuState(); }}
       on:mouseleave={() => { submenuHovered = false; closeProgramsMenu(); }}
     >
+      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/command/index.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98.js.org/programs/command/index.html'); open = false; } }}>
+        <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs_cool-3.png" alt="Command Prompt" class="i2">
+        Command Prompt
+      </div>
     </div>
   {/if}
 
@@ -158,11 +162,11 @@
       on:mouseenter={() => { gamesSubmenuHovered = true; updateGamesMenuState(); }}
       on:mouseleave={() => { gamesSubmenuHovered = false; closeGamesMenu(); }}
     >
-      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; }}>
+      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; } }}>
         <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Pinball" class="i2">
         Pinball
       </div>
-      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; }}>
+      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; } }}>
         <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Minesweeper" class="i2">
         Minesweeper
       </div>
@@ -288,11 +292,12 @@
     bottom: 295px;
     left: calc(0.7% + 196px);
     width: 120px;
-    height: 40px;
+    min-height: 40px;
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     z-index: 1001;
+    padding: 2px 0;
   }
   .games-submenu {
     position: fixed;

@@ -301,6 +301,7 @@
   function openNewWindow(url = 'https://www.msn.com/') {
     const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
     const isMinesweeper = url === 'https://98plus.js.org/programs/minesweeper/index.html';
+    const isCommandPrompt = url === 'https://98.js.org/programs/command/index.html';
     const newWindow = {
       id: nextWindowId++,
       windowPos: { x: 0, y: 0 },
@@ -317,6 +318,8 @@
       isPinball: isPinball,
       isFullscreenGame: isPinball || isMinesweeper,
       isMinesweeper: isMinesweeper,
+      isCommandPrompt: isCommandPrompt,
+      hideBrowserUI: isPinball || isMinesweeper || isCommandPrompt,
       favorites: [
         { name: 'Github', url: 'https://github.com/gamerc0der' },
         { name: 'HackClub', url: 'https://hackclub.com' }
@@ -350,20 +353,22 @@
           Space Cadet Pinball 3D
         {:else if window.isMinesweeper}
           Minesweeper
+        {:else if window.isCommandPrompt}
+          Command Prompt
         {:else}
           Microsoft Internet Explorer
         {/if}
       </div>
 
       <div class="title-bar-controls">
-        {#if !window.isFullscreenGame}
+        {#if !window.hideBrowserUI}
           <button aria-label="Minimize" on:click={() => minimizeWindow(window.id)}></button>
         {/if}
         <button aria-label="Maximize" on:click={() => maximizeWindow(window.id)}></button>
         <button aria-label="Close" on:click={() => closeWindow(window.id)}></button>
       </div>
     </div>
-    {#if !window.isFullscreenGame}
+    {#if !window.hideBrowserUI}
     <div class="browser-toolbar">
       <div class="nav-buttons">
         <button class="nav-btn" on:click={() => window.location.reload()}>
@@ -437,6 +442,8 @@
           </div>
         </div>
       {:else if window.currentUrl === 'https://www.msn.com/'}
+        <h1 class="name-header">gamerc0der</h1>
+        <div class="bio-section">bio goes here</div>
         <div class="social-icons">
           <a href="https://github.com" target="_blank" rel="noopener noreferrer">
             <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
@@ -543,15 +550,14 @@
         <iframe
           src={window.currentUrl}
           class="web-iframe"
-          class:fullscreen-iframe={window.isFullscreenGame}
           title="Web content"
-          sandbox={window.isFullscreenGame ? "allow-scripts" : "allow-scripts allow-same-origin allow-forms allow-popups"}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         ></iframe>
       {/if}
       </div>
     </div>
 
-    {#if !window.isFullscreenGame}
+    {#if !window.hideBrowserUI}
     <div class="status-bar">
       <span>Done</span>
       <span>My Computer</span>
@@ -952,11 +958,6 @@
     border: none;
   }
 
-  .fullscreen-iframe {
-    width: 100%;
-    height: calc(37.5vh - 42px - 24px);
-  }
-
   .time-display {
     position: fixed;
     bottom: 10px;
@@ -1249,6 +1250,28 @@
     color: #000;
     text-align: center;
     line-height: 1.4;
+  }
+
+  .name-header {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .bio-section {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 20px;
+    text-align: center;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
   }
 
 </style>
