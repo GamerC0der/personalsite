@@ -299,19 +299,22 @@
   }
 
   function openNewWindow(url = 'https://www.msn.com/') {
+    const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
     const newWindow = {
       id: nextWindowId++,
-      windowPos: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
+      windowPos: { x: 0, y: 0 },
       currentUrl: url,
       inputUrl: url,
       urlHistory: [url],
       historyIndex: 0,
       isMinimized: false,
-      isMaximized: false,
-      originalSize: { width: 600, height: 'auto' },
-      originalPos: { x: 100, y: 100 },
+      isMaximized: true,
+      originalSize: { width: '100vw', height: 'calc(100vh - 42px)' },
+      originalPos: { x: 0, y: 0 },
       sidebarOpen: false,
       historySearchQuery: '',
+      isPinball: isPinball,
+      isFullscreenGame: isPinball,
       favorites: [
         { name: 'NextJS', url: 'https://nextjs.org' },
         { name: 'HackClub', url: 'https://hackclub.com' }
@@ -336,19 +339,27 @@
   {#if !window.isMinimized}
     <div class="window"
        class:maximized={window.isMaximized}
+       class:fullscreen-game={window.isFullscreenGame}
        data-window-id={window.id}
-       style="position: fixed; left: {window.windowPos.x}px; top: {window.windowPos.y}px; width: {window.isMaximized ? '100vw' : '600px'}; height: {window.isMaximized ? '100vh' : '400px'}; z-index: 2000;">
+       style="position: fixed; left: {window.windowPos.x}px; top: {window.windowPos.y}px; width: {window.isMaximized ? '100vw' : window.originalSize.width + 'px'}; height: {window.isMaximized ? '100vh' : (window.isFullscreenGame ? window.originalSize.height + 'px' : '400px')}; z-index: 2000;">
     <div class="title-bar" role="button" tabindex="0">
       <div class="title-bar-text">
-        Microsoft Internet Explorer
+        {#if window.isPinball}
+          Space Cadet Pinball 3D
+        {:else}
+          Microsoft Internet Explorer
+        {/if}
       </div>
 
       <div class="title-bar-controls">
-        <button aria-label="Minimize" on:click={() => minimizeWindow(window.id)}></button>
+        {#if !window.isFullscreenGame}
+          <button aria-label="Minimize" on:click={() => minimizeWindow(window.id)}></button>
+        {/if}
         <button aria-label="Maximize" on:click={() => maximizeWindow(window.id)}></button>
         <button aria-label="Close" on:click={() => closeWindow(window.id)}></button>
       </div>
     </div>
+    {#if !window.isFullscreenGame}
     <div class="browser-toolbar">
       <div class="nav-buttons">
         <button class="nav-btn" on:click={() => window.location.reload()}>
@@ -394,6 +405,7 @@
       <input type="text" class="address-input" bind:value={window.inputUrl} on:keydown={(e) => { if (e.key === 'Enter') goToUrl(window.id); }}>
       <button class="go-btn" on:click={() => goToUrl(window.id)}>Go</button>
     </div>
+    {/if}
 
     <div class="browser-content" class:sidebar-open={window.sidebarOpen}>
       {#if window.sidebarOpen}
@@ -527,17 +539,20 @@
         <iframe
           src={window.currentUrl}
           class="web-iframe"
+          class:fullscreen-iframe={window.isFullscreenGame}
           title="Web content"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          sandbox={window.isPinball ? "allow-scripts" : "allow-scripts allow-same-origin allow-forms allow-popups"}
         ></iframe>
       {/if}
       </div>
     </div>
 
+    {#if !window.isFullscreenGame}
     <div class="status-bar">
       <span>Done</span>
       <span>My Computer</span>
     </div>
+    {/if}
   </div>
   {/if}
 {/each}
@@ -927,6 +942,11 @@
     width: 100%;
     height: 100%;
     border: none;
+  }
+
+  .fullscreen-iframe {
+    width: 100%;
+    height: calc(100vh - 42px - 24px);
   }
 
   .time-display {

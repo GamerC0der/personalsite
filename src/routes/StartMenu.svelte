@@ -1,7 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-
   export let openNewWindow;
   export let openRunMenu;
 
@@ -9,7 +6,15 @@
   let programsMenuOpen = false;
   let programsItemHovered = false;
   let submenuHovered = false;
+  let gamesMenuOpen = false;
+  let gamesItemHovered = false;
+  let gamesSubmenuHovered = false;
   let closeTimeout = null;
+
+  $: if (!open) {
+    programsMenuOpen = false;
+    gamesMenuOpen = false;
+  }
 
   function updateProgramsMenuState() {
     if (closeTimeout) {
@@ -26,9 +31,26 @@
       }
     }, 100);
   }
+
+  function updateGamesMenuState() {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      closeTimeout = null;
+    }
+    gamesMenuOpen = gamesItemHovered || gamesSubmenuHovered;
+  }
+
+  function closeGamesMenu() {
+    closeTimeout = setTimeout(() => {
+      if (!gamesItemHovered && !gamesSubmenuHovered) {
+        gamesMenuOpen = false;
+      }
+    }, 100);
+  }
   const items = [
     ['windows_update_large-2', 'Windows Update'],
     ['appwizard-4', 'Programs'],
+    ['joystick-2', 'Games'],
     ['directory_favorites-3', 'Favorites'],
     ['directory_open_file_mydocs_cool-3', 'Documents'],
     ['settings_gear-2', 'Settings'],
@@ -63,6 +85,7 @@
         <div
           class="item"
           class:programs-item={text === 'Programs'}
+          class:games-item={text === 'Games'}
           on:click={() => {
             if (text === 'Log Off') {
               window.location.reload();
@@ -95,14 +118,14 @@
               open = false;
             }
           }}
-          on:mouseenter={text === 'Programs' ? () => { programsItemHovered = true; updateProgramsMenuState(); } : null}
-          on:mouseleave={text === 'Programs' ? () => { programsItemHovered = false; closeProgramsMenu(); } : null}
+          on:mouseenter={text === 'Programs' ? () => { programsItemHovered = true; gamesMenuOpen = false; updateProgramsMenuState(); } : text === 'Games' ? () => { gamesItemHovered = true; programsMenuOpen = false; updateGamesMenuState(); } : () => { programsMenuOpen = false; gamesMenuOpen = false; }}
+          on:mouseleave={text === 'Programs' ? () => { programsItemHovered = false; closeProgramsMenu(); } : text === 'Games' ? () => { gamesItemHovered = false; closeGamesMenu(); } : null}
           role="button"
           tabindex="0"
         >
           <img src="https://win98icons.alexmeub.com/icons/png/{icon}.png" alt="{text}" class="i2">
           {text}
-          {#if text === 'Programs'}
+          {#if text === 'Programs' || text === 'Games'}
             <span class="arrow">▶</span>
           {/if}
         </div>
@@ -118,6 +141,21 @@
       on:mouseenter={() => { submenuHovered = true; updateProgramsMenuState(); }}
       on:mouseleave={() => { submenuHovered = false; closeProgramsMenu(); }}
     >
+    </div>
+  {/if}
+
+  {#if gamesMenuOpen}
+    <div
+      class="games-submenu"
+      role="menu"
+      tabindex="0"
+      on:mouseenter={() => { gamesSubmenuHovered = true; updateGamesMenuState(); }}
+      on:mouseleave={() => { gamesSubmenuHovered = false; closeGamesMenu(); }}
+    >
+      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; }}>
+        <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Pinball" class="i2">
+        Pinball
+      </div>
     </div>
   {/if}
 {/if}
@@ -227,6 +265,9 @@
   .programs-item {
     position: relative;
   }
+  .games-item {
+    position: relative;
+  }
   .arrow {
     margin-left: auto;
     font-size: 12px;
@@ -234,7 +275,7 @@
   }
   .programs-submenu {
     position: fixed;
-    bottom: 270px;
+    bottom: 295px;
     left: calc(0.7% + 196px);
     width: 120px;
     height: 40px;
@@ -242,5 +283,33 @@
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     z-index: 1001;
+  }
+  .games-submenu {
+    position: fixed;
+    bottom: 265px;
+    left: calc(0.7% + 196px);
+    width: 120px;
+    min-height: 40px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    padding: 2px 0;
+  }
+
+  .submenu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-family: 'Win98', 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: black;
+  }
+
+  .submenu-item:hover {
+    background: #000080;
+    color: white;
   }
 </style>
