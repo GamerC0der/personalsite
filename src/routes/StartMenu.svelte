@@ -98,6 +98,9 @@
             } else if (text === 'Run...') {
               openRunMenu();
               open = false;
+            } else if (text === 'Favorites') {
+              openNewWindow('https://www.internetexplorer.com/');
+              open = false;
             } else {
               open = false;
             }
@@ -113,6 +116,9 @@
               open = false;
             } else if (text === 'Run...') {
               openRunMenu();
+              open = false;
+            } else if (text === 'Favorites') {
+              openNewWindow('https://www.internetexplorer.com/');
               open = false;
             } else {
               open = false;
@@ -155,6 +161,10 @@
       <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; }}>
         <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Pinball" class="i2">
         Pinball
+      </div>
+      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; }}>
+        <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Minesweeper" class="i2">
+        Minesweeper
       </div>
     </div>
   {/if}
@@ -289,7 +299,7 @@
     bottom: 265px;
     left: calc(0.7% + 196px);
     width: 120px;
-    min-height: 40px;
+    min-height: 80px;
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
