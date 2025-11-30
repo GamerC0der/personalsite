@@ -11,6 +11,10 @@
         <span class="language-name">React</span>
       </div>
       <div class="language-item">
+        <i class="devicon-svelte-plain language-icon"></i>
+        <span class="language-name">Svelte</span>
+      </div>
+      <div class="language-item">
         <i class="devicon-html5-plain language-icon"></i>
         <span class="language-name">HTML</span>
       </div>
