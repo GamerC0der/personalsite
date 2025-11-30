@@ -521,38 +521,19 @@
     <div class="browser-toolbar">
       <div class="nav-buttons">
         <button class="nav-btn" on:click={() => window.location.reload()}>
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="4" width="8" height="8" fill="white" stroke="currentColor" stroke-width="1"/>
-            <path d="M6 5 L8 3 L10 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M10 11 L8 13 L6 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M8 3 L8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M8 10 L8 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+          <i class="fas fa-rotate-right nav-icon"></i>
           <span class="nav-text">Refresh</span>
         </button>
         <button class="nav-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/')}>
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 2 L3 6 L3 13 L6 13 L6 9 L10 9 L10 13 L13 13 L13 6 Z" fill="white" stroke="currentColor" stroke-width="1"/>
-            <rect x="6" y="11" width="4" height="2" fill="currentColor"/>
-          </svg>
+          <i class="fas fa-home nav-icon"></i>
           <span class="nav-text">Home</span>
         </button>
         <button class="nav-btn" on:click={() => toggleSidebar(window.id)}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32">
-            <polygon points="16,4 20,12 29,12 22,18 25,26 16,21 7,26 10,18 3,12 12,12"
-              fill="white"/>
-          </svg>
-
-
+          <i class="fas fa-star nav-icon"></i>
           <span class="nav-text">Favorites</span>
         </button>
         <button class="nav-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/history')}>
-          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="8" cy="8" r="6" fill="white" stroke="currentColor" stroke-width="1"/>
-            <path d="M8 4 L8 8 L10 10" stroke="black" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            <path d="M8 8 L8 12" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M8 4 A4 4 0 0 1 8 8" stroke="currentColor" stroke-width="1" fill="none"/>
-          </svg>
+          <i class="fas fa-history nav-icon"></i>
           <span class="nav-text">History</span>
         </button>
       </div>
@@ -561,7 +542,12 @@
     <div class="address-bar">
       <div class="address-label">Address:</div>
       <input type="text" class="address-input" bind:value={window.inputUrl} on:keydown={(e) => { if (e.key === 'Enter') goToUrl(window.id); }}>
-      <button class="go-btn" on:click={() => goToUrl(window.id)}>Go</button>
+      <button class="go-btn" on:click={() => goToUrl(window.id)}>
+        <svg class="go-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 8 L12 8 M10 6 L12 8 L10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        Go
+      </button>
     </div>
     {/if}
 
@@ -935,20 +921,19 @@
     height: 18px;
     margin-bottom: 1px;
     display: block;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
+    font-size: 16px;
+    text-align: center;
+    line-height: 18px;
   }
 
   .nav-btn:disabled .nav-icon {
-    stroke: #808080;
-    fill: #808080;
+    color: #808080;
   }
 
   .nav-text {
     font-size: 11px;
     font-weight: normal;
-    color: #000;
+    color: #333;
     line-height: 1;
     display: inline-block;
   }
@@ -988,6 +973,18 @@
     font-family: 'MS Sans Serif', sans-serif;
     font-size: 12px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .go-icon {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
   }
 
   .go-btn:hover {

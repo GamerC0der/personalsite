@@ -4,6 +4,7 @@
   "description": "Submission for #personal-site-ysws",
   "main": "index.js",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "@tailwindcss/postcss": "^4.1.16",
     "98.css": "^0.1.21",
     "acorn": "^8.15.0",
