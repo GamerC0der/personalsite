@@ -566,10 +566,59 @@
             <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
           </a>
         </div>
+
+        <div class="languages-section">
+          <h2 class="languages-title">Programming Languages</h2>
+          <div class="languages-grid">
+            <div class="language-item">
+              <i class="devicon-react-original language-icon"></i>
+              <span class="language-name">React</span>
+            </div>
+            <div class="language-item">
+              <i class="devicon-html5-plain language-icon"></i>
+              <span class="language-name">HTML</span>
+            </div>
+            <div class="language-item">
+              <i class="devicon-javascript-plain language-icon"></i>
+              <span class="language-name">JavaScript</span>
+            </div>
+            <div class="language-item">
+              <i class="devicon-css3-plain language-icon"></i>
+              <span class="language-name">CSS</span>
+            </div>
+          </div>
+          <div class="view-more-container">
+            <button class="view-more-link" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/languages')}>See All Languages</button>
+          </div>
+        </div>
+
         <button class="projects-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/projects')}>Projects</button>
       {:else if window.currentUrl === 'https://www.msn.com/projects'}
         <div class="projects-page">
           <h1 class="projects-title">My Projects</h1>
+
+          <div class="languages-section">
+            <h2 class="languages-title">Programming Languages</h2>
+            <div class="languages-grid">
+              <div class="language-item">
+                <i class="devicon-react-original language-icon"></i>
+                <span class="language-name">React</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-html5-plain language-icon"></i>
+                <span class="language-name">HTML</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-javascript-plain language-icon"></i>
+                <span class="language-name">JavaScript</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-css3-plain language-icon"></i>
+                <span class="language-name">CSS</span>
+              </div>
+            </div>
+          </div>
+
           <div class="search-container">
             <input
               type="text"
@@ -599,6 +648,50 @@
               <div class="no-results">No projects found matching your search.</div>
             {/if}
           {/if}
+        </div>
+      {:else if window.currentUrl === 'https://www.msn.com/languages'}
+        <div class="languages-page">
+          <h1 class="languages-main-title">Programming Languages</h1>
+
+          <div class="languages-showcase">
+            <div class="languages-grid">
+              <div class="language-item">
+                <i class="devicon-react-original language-icon"></i>
+                <span class="language-name">React</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-html5-plain language-icon"></i>
+                <span class="language-name">HTML</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-javascript-plain language-icon"></i>
+                <span class="language-name">JavaScript</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-css3-plain language-icon"></i>
+                <span class="language-name">CSS</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-typescript-plain language-icon"></i>
+                <span class="language-name">TypeScript</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-python-plain language-icon"></i>
+                <span class="language-name">Python</span>
+              </div>
+              <div class="language-item">
+                <i class="devicon-lua-plain language-icon"></i>
+                <span class="language-name">Lua</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="back-container">
+            <button class="back-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/')}>
+              <span class="back-icon">←</span>
+              Back
+            </button>
+          </div>
         </div>
       {:else if window.currentUrl === 'https://www.msn.com/update'}
         <div class="update-message">
@@ -1270,6 +1363,118 @@
     font-size: 12px;
     color: #000;
     padding: 20px;
+  }
+
+  .languages-page {
+    padding: 20px;
+  }
+
+  .languages-main-title {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+    text-align: center;
+  }
+
+  .languages-showcase {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+
+  .languages-section {
+    margin-bottom: 20px;
+  }
+
+  .languages-title {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+  }
+
+  .languages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .language-item {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+
+  .language-item:hover {
+    background: #d0d0d0;
+  }
+
+  .language-icon {
+    font-size: 24px;
+    color: #000;
+  }
+
+  .language-name {
+    flex: 1;
+  }
+
+  .view-more-container {
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  .view-more-link {
+    padding: 6px 12px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    color: #000;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .view-more-link:hover {
+    border: 2px inset #c0c0c0;
+    text-decoration: none;
+  }
+
+  .back-container {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .back-btn {
+    padding: 6px 12px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .back-btn:hover {
+    border: 2px inset #c0c0c0;
+  }
+
+  .back-icon {
+    font-size: 14px;
+    line-height: 1;
   }
 
   .run-window {
