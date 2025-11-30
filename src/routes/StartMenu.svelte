@@ -44,7 +44,7 @@
             if (text === 'Log Off') {
               window.location.reload();
             } else if (text === 'Programs') {
-              openNewWindow('https://98.js.org/programs/command/index.html');
+              openNewWindow('explorer://');
               open = false;
             } else if (text === 'Games') {
               openNewWindow('https://98plus.js.org/programs/minesweeper/index.html');
@@ -72,7 +72,7 @@
             if (text === 'Log Off') {
               window.location.reload();
             } else if (text === 'Programs') {
-              openNewWindow('https://98.js.org/programs/command/index.html');
+              openNewWindow('explorer://');
               open = false;
             } else if (text === 'Games') {
               openNewWindow('https://98plus.js.org/programs/minesweeper/index.html');

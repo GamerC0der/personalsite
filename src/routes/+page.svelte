@@ -71,9 +71,55 @@
   let currentTime = '';
   let nextWindowId = 2;
 
+  let winampOpen = false;
+
   let runMenuOpen = false;
   let runWindowPos = { x: 100, y: 100 };
   let runCommand = '';
+
+  function openNewWindow(url = 'https://www.msn.com/') {
+    const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
+    const isMinesweeper = url === 'https://98plus.js.org/programs/minesweeper/index.html';
+    const isCommandPrompt = url === 'https://98.js.org/programs/command/index.html';
+    const isExplorer = url === 'explorer://';
+
+    if (isMobile) {
+      windows = [];
+    }
+
+    const newWindow = {
+      id: nextWindowId++,
+      windowPos: { x: 0, y: 0 },
+      currentUrl: url,
+      inputUrl: url,
+      urlHistory: [url],
+      historyIndex: 0,
+      isMinimized: false,
+      isMaximized: isPinball || (isMobile && !isCommandPrompt),
+      originalSize: (isPinball || isMinesweeper) ? { width: '100vw', height: 'calc(100vh - 42px)' } : isExplorer ? { width: 600, height: 400 } : { width: 600, height: 'auto' },
+      originalPos: { x: 0, y: 0 },
+      sidebarOpen: false,
+      historySearchQuery: '',
+      isPinball: isPinball,
+      isFullscreenGame: isPinball || isMinesweeper,
+      isMinesweeper: isMinesweeper,
+      isCommandPrompt: isCommandPrompt,
+      isExplorer: isExplorer,
+      hideBrowserUI: isPinball || isMinesweeper || isCommandPrompt || isExplorer,
+      favorites: [
+        { name: 'Github', url: 'https://github.com/gamerc0der' },
+        { name: 'HackClub', url: 'https://hackclub.com' }
+      ]
+    };
+    windows = [...windows, newWindow];
+
+    setTimeout(() => {
+      window.$(`.window[data-window-id="${newWindow.id}"]`).draggable({
+        handle: '.title-bar',
+        containment: 'document'
+      });
+    }, 50);
+  }
 
   let messageWindows = [];
   let nextMessageWindowId = 1;
@@ -138,7 +184,6 @@
     document.addEventListener('contextmenu', showContextMenu);
     document.addEventListener('click', hideContextMenu);
 
-    // Idle detection setup
     const resetIdleTimer = () => {
       lastMouseMove = Date.now();
       if (isIdle) {
@@ -164,7 +209,6 @@
     document.addEventListener('keydown', resetIdleTimer);
     document.addEventListener('scroll', resetIdleTimer);
 
-    // Start the initial idle timer
     idleTimeout = setTimeout(() => {
       if (Date.now() - lastMouseMove >= 5000) {
         isIdle = true;
@@ -189,7 +233,7 @@
   });
 
   function minimizeWindow(windowId) {
-    if (isMobile) return; // Do nothing on mobile
+    if (isMobile) return;
     windows = windows.map(w =>
       w.id === windowId
         ? { ...w, isMinimized: true }
@@ -246,7 +290,7 @@
   }
 
   function closeWindow(windowId) {
-    if (isMobile) return; // Do nothing on mobile
+    if (isMobile) return;
     windows = windows.filter(w => w.id !== windowId);
   }
 
@@ -433,47 +477,6 @@
     }
   }
 
-  function openNewWindow(url = 'https://www.msn.com/') {
-    const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
-    const isMinesweeper = url === 'https://98plus.js.org/programs/minesweeper/index.html';
-    const isCommandPrompt = url === 'https://98.js.org/programs/command/index.html';
-
-    if (isMobile) {
-      windows = [];
-    }
-
-    const newWindow = {
-      id: nextWindowId++,
-      windowPos: { x: 0, y: 0 },
-      currentUrl: url,
-      inputUrl: url,
-      urlHistory: [url],
-      historyIndex: 0,
-      isMinimized: false,
-      isMaximized: isPinball || (isMobile && !isCommandPrompt),
-      originalSize: (isPinball || isMinesweeper) ? { width: '100vw', height: 'calc(100vh - 42px)' } : { width: 600, height: 'auto' },
-      originalPos: { x: 0, y: 0 },
-      sidebarOpen: false,
-      historySearchQuery: '',
-      isPinball: isPinball,
-      isFullscreenGame: isPinball || isMinesweeper,
-      isMinesweeper: isMinesweeper,
-      isCommandPrompt: isCommandPrompt,
-      hideBrowserUI: isPinball || isMinesweeper || isCommandPrompt,
-      favorites: [
-        { name: 'Github', url: 'https://github.com/gamerc0der' },
-        { name: 'HackClub', url: 'https://hackclub.com' }
-      ]
-    };
-    windows = [...windows, newWindow];
-
-    setTimeout(() => {
-      window.$(`.window[data-window-id="${newWindow.id}"]`).draggable({
-        handle: '.title-bar',
-        containment: 'document'
-      });
-    }, 50);
-  }
 </script>
 
 <div style="background-color: black; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
@@ -545,6 +548,8 @@
           Minesweeper
         {:else if window.isCommandPrompt}
           Command Prompt
+        {:else if window.isExplorer}
+          My Computer
         {:else}
           Microsoft Internet Explorer
         {/if}
@@ -608,7 +613,7 @@
         </div>
       </div>
       {/if}
-      <div class="webpage-content" class:fullscreen-game-content={window.isFullscreenGame || window.isCommandPrompt}>
+      <div class="webpage-content" class:fullscreen-game-content={window.isFullscreenGame || window.isCommandPrompt || window.isWinAmp || window.isExplorer}>
       {#if window.currentUrl === 'https://www.msn.com/about'}
         <div class="about-page">
           <h1 class="about-title">About This Website</h1>
@@ -658,28 +663,6 @@
       {:else if window.currentUrl === 'https://www.msn.com/projects'}
         <div class="projects-page">
           <h1 class="projects-title">My Projects</h1>
-
-          <div class="languages-section">
-            <h2 class="languages-title">Programming Languages</h2>
-            <div class="languages-grid">
-              <div class="language-item">
-                <i class="devicon-react-original language-icon"></i>
-                <span class="language-name">React</span>
-              </div>
-              <div class="language-item">
-                <i class="devicon-html5-plain language-icon"></i>
-                <span class="language-name">HTML</span>
-              </div>
-              <div class="language-item">
-                <i class="devicon-javascript-plain language-icon"></i>
-                <span class="language-name">JavaScript</span>
-              </div>
-              <div class="language-item">
-                <i class="devicon-css3-plain language-icon"></i>
-                <span class="language-name">CSS</span>
-              </div>
-            </div>
-          </div>
 
           <div class="search-container">
             <input
@@ -815,13 +798,45 @@
             <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
           </div>
         </div>
+      {:else if window.isWinAmp}
+        <div class="winamp-window">
+          <iframe
+            src="/winamp.html"
+            class="winamp-iframe"
+            title="WinAMP"
+            sandbox="allow-scripts allow-same-origin"
+          ></iframe>
+        </div>
+      {:else if window.isExplorer}
+        <div class="explorer-window">
+          <div class="explorer-toolbar">
+            <div class="explorer-address-bar">
+              <span class="address-label">Address:</span>
+              <div class="address-display">My Computer</div>
+            </div>
+          </div>
+          <div class="explorer-content">
+            <div class="program-item" on:click={() => { openNewWindow('https://www.msn.com/'); closeWindow(window.id); }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://www.msn.com/'); closeWindow(window.id); } }} role="button" tabindex="0">
+              <img src="https://win98icons.alexmeub.com/icons/png/world-3.png" alt="Internet Explorer" class="program-icon">
+              <span class="program-name">Internet Explorer</span>
+            </div>
+            <div class="program-item" on:click={() => { openNewWindow('https://98.js.org/programs/command/index.html'); closeWindow(window.id); }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98.js.org/programs/command/index.html'); closeWindow(window.id); } }} role="button" tabindex="0">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Windows_98_CONSOLE_PROMPT.png" alt="Command Prompt" class="program-icon">
+              <span class="program-name">Command Prompt</span>
+            </div>
+            <div class="program-item" on:click={() => { winampOpen = true; closeWindow(window.id); }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { winampOpen = true; closeWindow(window.id); } }} role="button" tabindex="0">
+              <img src="https://webamp.org/assets/favicon-BX6eJgec.ico" alt="WinAMP" class="program-icon">
+              <span class="program-name">WinAMP</span>
+            </div>
+          </div>
+        </div>
       {:else}
         <iframe
           src={window.currentUrl}
           class="web-iframe"
           title="Web content"
           tabindex="0"
-          sandbox={window.isCommandPrompt ? "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-pointer-lock allow-top-navigation" : "allow-scripts allow-same-origin allow-forms allow-popups"}
+          sandbox={window.isCommandPrompt ? "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-pointer-lock allow-top-navigation" : window.isMinesweeper ? "allow-scripts allow-same-origin allow-forms" : "allow-scripts allow-same-origin allow-forms allow-popups"}
         ></iframe>
       {/if}
       </div>
@@ -881,6 +896,17 @@
     src={screensaverUrl}
     class="screensaver-iframe"
     title="Screensaver"
+    sandbox="allow-scripts allow-same-origin"
+  ></iframe>
+</div>
+{/if}
+
+{#if winampOpen}
+<div class="winamp-overlay">
+  <iframe
+    src="/winamp.html"
+    class="winamp-overlay-iframe"
+    title="WinAMP"
     sandbox="allow-scripts allow-same-origin"
   ></iframe>
 </div>
@@ -1248,6 +1274,35 @@
     width: 100%;
     height: 100%;
     border: none;
+  }
+  .winamp-window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .winamp-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+  }
+  .winamp-overlay {
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    right: 50px;
+    bottom: 50px;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  .winamp-overlay-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    pointer-events: auto;
   }
 
   .time-display {
@@ -1752,6 +1807,74 @@
     width: 100%;
     height: 100%;
     border: none;
+  }
+  .explorer-window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+  }
+  .explorer-toolbar {
+    background: #c0c0c0;
+    border-bottom: 2px inset #c0c0c0;
+    padding: 4px 8px;
+  }
+  .explorer-address-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .address-label {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+  }
+  .address-display {
+    flex: 1;
+    padding: 2px 4px;
+    border: 2px inset #c0c0c0;
+    background: white;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+  .explorer-content {
+    flex: 1;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+  }
+  .program-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+  .program-item:focus {
+    outline: 1px dotted #000;
+  }
+  .program-icon {
+    width: 48px;
+    height: 48px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+  .program-name {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 12px;
+    color: #000;
+    text-align: center;
+    word-wrap: break-word;
+    max-width: 100px;
   }
 
 </style>
