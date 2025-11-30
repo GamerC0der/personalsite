@@ -58,6 +58,9 @@
             } else if (text === 'Run...') {
               openRunMenu();
               open = false;
+            } else if (text === 'Find') {
+              openRunMenu();
+              open = false;
             } else if (text === 'Favorites') {
               openNewWindow('https://www.internetexplorer.com/');
               open = false;
@@ -81,6 +84,9 @@
               openNewWindow('/help');
               open = false;
             } else if (text === 'Run...') {
+              openRunMenu();
+              open = false;
+            } else if (text === 'Find') {
               openRunMenu();
               open = false;
             } else if (text === 'Favorites') {

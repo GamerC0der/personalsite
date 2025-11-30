@@ -88,6 +88,11 @@
   let isMobile = false;
   let timeInterval;
 
+  let isIdle = false;
+  let idleTimeout;
+  let lastMouseMove = Date.now();
+  const screensaverUrl = 'https://98.js.org/programs/pipes/#{"hideUI":true}';
+
   function updateTime() {
     currentTime = new Date().toLocaleTimeString();
   }
@@ -132,11 +137,47 @@
 
     document.addEventListener('contextmenu', showContextMenu);
     document.addEventListener('click', hideContextMenu);
+
+    // Idle detection setup
+    const resetIdleTimer = () => {
+      lastMouseMove = Date.now();
+      if (isIdle) {
+        isIdle = false;
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => {
+          if (Date.now() - lastMouseMove >= 5000) {
+            isIdle = true;
+          }
+        }, 5000);
+      } else {
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => {
+          if (Date.now() - lastMouseMove >= 5000) {
+            isIdle = true;
+          }
+        }, 5000);
+      }
+    };
+
+    document.addEventListener('mousemove', resetIdleTimer);
+    document.addEventListener('mousedown', resetIdleTimer);
+    document.addEventListener('keydown', resetIdleTimer);
+    document.addEventListener('scroll', resetIdleTimer);
+
+    // Start the initial idle timer
+    idleTimeout = setTimeout(() => {
+      if (Date.now() - lastMouseMove >= 5000) {
+        isIdle = true;
+      }
+    }, 5000);
   });
 
   onDestroy(() => {
     if (timeInterval) {
       clearInterval(timeInterval);
+    }
+    if (idleTimeout) {
+      clearTimeout(idleTimeout);
     }
     if (typeof document !== 'undefined') {
       document.removeEventListener('contextmenu', showContextMenu);
@@ -833,6 +874,17 @@
     </div>
   {/if}
 {/each}
+
+{#if isIdle}
+<div class="screensaver-overlay">
+  <iframe
+    src={screensaverUrl}
+    class="screensaver-iframe"
+    title="Screensaver"
+    sandbox="allow-scripts allow-same-origin"
+  ></iframe>
+</div>
+{/if}
 
 <StartMenu {openNewWindow} openRunMenu={toggleRunMenu} />
 
@@ -1683,6 +1735,23 @@
     background: #808080;
     margin: 2px 1px;
     border-top: 1px solid #ffffff;
+  }
+
+  .screensaver-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    z-index: 10000;
+    cursor: none;
+  }
+
+  .screensaver-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
   }
 
 </style>
