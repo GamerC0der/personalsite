@@ -85,18 +85,32 @@
     target: null
   };
 
+  let isMobile = false;
   let timeInterval;
 
   function updateTime() {
     currentTime = new Date().toLocaleTimeString();
   }
 
+  function checkMobile() {
+    isMobile = window.innerWidth <= 768 || window.innerHeight <= 600;
+  }
+
   onMount(() => {
     console.log('jQuery version:', window.$.fn.jquery);
     console.log('jQuery UI available:', typeof window.$.fn.draggable === 'function');
 
-    windows[0].windowPos.x = window.innerWidth / 2 - 300;
-    windows[0].windowPos.y = window.innerHeight / 2 - 200;
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    if (isMobile) {
+      windows[0].isMaximized = true;
+      windows[0].originalPos = { x: window.innerWidth / 2 - 300, y: window.innerHeight / 2 - 200 };
+      windows[0].windowPos = { x: 0, y: 0 };
+    } else {
+      windows[0].windowPos.x = window.innerWidth / 2 - 300;
+      windows[0].windowPos.y = window.innerHeight / 2 - 200;
+    }
     updateTime();
     timeInterval = setInterval(updateTime, 1000);
     fetchProjects();
@@ -116,7 +130,6 @@
       });
     }, 100);
 
-    // Add right-click context menu
     document.addEventListener('contextmenu', showContextMenu);
     document.addEventListener('click', hideContextMenu);
   });
@@ -129,9 +142,13 @@
       document.removeEventListener('contextmenu', showContextMenu);
       document.removeEventListener('click', hideContextMenu);
     }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', checkMobile);
+    }
   });
 
   function minimizeWindow(windowId) {
+    if (isMobile) return; // Do nothing on mobile
     windows = windows.map(w =>
       w.id === windowId
         ? { ...w, isMinimized: true }
@@ -140,6 +157,25 @@
   }
 
   function maximizeWindow(windowId) {
+    if (isMobile) {
+      windows = windows.map(w => {
+        if (w.id === windowId && !w.isMaximized) {
+          setTimeout(() => {
+            window.$(`.window[data-window-id="${windowId}"]`).draggable('disable');
+          }, 50);
+          return {
+            ...w,
+            originalPos: { ...w.windowPos },
+            originalSize: { width: 600, height: 400 },
+            isMaximized: true,
+            windowPos: { x: 0, y: 0 }
+          };
+        }
+        return w;
+      });
+      return;
+    }
+
     windows = windows.map(w => {
       if (w.id === windowId) {
         if (!w.isMaximized) {
@@ -169,6 +205,7 @@
   }
 
   function closeWindow(windowId) {
+    if (isMobile) return; // Do nothing on mobile
     windows = windows.filter(w => w.id !== windowId);
   }
 
@@ -359,6 +396,11 @@
     const isPinball = url === 'https://98.js.org/programs/pinball/space-cadet.html';
     const isMinesweeper = url === 'https://98plus.js.org/programs/minesweeper/index.html';
     const isCommandPrompt = url === 'https://98.js.org/programs/command/index.html';
+
+    if (isMobile) {
+      windows = [];
+    }
+
     const newWindow = {
       id: nextWindowId++,
       windowPos: { x: 0, y: 0 },
@@ -367,7 +409,7 @@
       urlHistory: [url],
       historyIndex: 0,
       isMinimized: false,
-      isMaximized: isPinball,
+      isMaximized: isPinball || (isMobile && !isCommandPrompt),
       originalSize: (isPinball || isMinesweeper) ? { width: '100vw', height: 'calc(100vh - 42px)' } : { width: 600, height: 'auto' },
       originalPos: { x: 0, y: 0 },
       sidebarOpen: false,
@@ -408,6 +450,18 @@
       if (e.key === 'Escape') hideContextMenu();
     }}
   >
+    <div class="context-menu-item" role="menuitem" tabindex="0">
+      <span class="context-menu-text"><u>A</u>ctive Desktop</span>
+      <span class="context-menu-arrow">▶</span>
+    </div>
+    <div class="context-menu-item" role="menuitem" tabindex="0">
+      <span class="context-menu-text"><u>A</u>rrange Icons</span>
+      <span class="context-menu-arrow">▶</span>
+    </div>
+    <div class="context-menu-item" role="menuitem" tabindex="0">
+      <span class="context-menu-text">L<u>i</u>ne Up Icons</span>
+    </div>
+    <div class="context-menu-separator"></div>
     <div
       class="context-menu-item"
       role="menuitem"
@@ -415,42 +469,23 @@
       on:click={() => handleContextMenuAction('refresh')}
       on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('refresh'); }}
     >
-      <span class="context-menu-icon">🔄</span>
-      Refresh
+      <span class="context-menu-text">R<u>e</u>fresh</span>
     </div>
-    {#if contextMenu.target && contextMenu.target.closest('.window')}
-      <div class="context-menu-separator"></div>
-      <div
-        class="context-menu-item"
-        role="menuitem"
-        tabindex="0"
-        on:click={() => handleContextMenuAction('minimize')}
-        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('minimize'); }}
-      >
-        <span class="context-menu-icon">_</span>
-        Minimize
-      </div>
-      <div
-        class="context-menu-item"
-        role="menuitem"
-        tabindex="0"
-        on:click={() => handleContextMenuAction('maximize')}
-        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('maximize'); }}
-      >
-        <span class="context-menu-icon">⬜</span>
-        Maximize
-      </div>
-      <div
-        class="context-menu-item"
-        role="menuitem"
-        tabindex="0"
-        on:click={() => handleContextMenuAction('close')}
-        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleContextMenuAction('close'); }}
-      >
-        <span class="context-menu-icon">✕</span>
-        Close
-      </div>
-    {/if}
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item disabled" role="menuitem" aria-disabled="true">
+      <span class="context-menu-text"><u>P</u>aste</span>
+    </div>
+    <div class="context-menu-item disabled" role="menuitem" aria-disabled="true">
+      <span class="context-menu-text">Paste <u>S</u>hortcut</span>
+    </div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" role="menuitem" tabindex="0">
+      <span class="context-menu-text"><u>N</u>ew</span>
+      <span class="context-menu-arrow">▶</span>
+    </div>
+    <div class="context-menu-item" role="menuitem" tabindex="0">
+      <span class="context-menu-text"><u>P</u>roperties</span>
+    </div>
   </div>
 {/if}
 
@@ -1597,41 +1632,60 @@
   .context-menu {
     position: fixed;
     background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    border: 1px solid #808080;
+    border-right: 2px solid #000000;
+    border-bottom: 2px solid #000000;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
     z-index: 10000;
-    min-width: 120px;
+    min-width: 180px;
     font-family: 'MS Sans Serif', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     padding: 2px 0;
   }
 
   .context-menu-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
+    justify-content: space-between;
+    padding: 2px 20px 2px 18px;
     cursor: pointer;
-    color: #000;
+    color: #000000;
     user-select: none;
+    white-space: nowrap;
   }
 
-  .context-menu-item:hover {
+  .context-menu-item:hover:not(.disabled) {
     background: #000080;
-    color: #fff;
+    color: #ffffff;
   }
 
-  .context-menu-icon {
-    width: 16px;
-    text-align: center;
-    font-size: 10px;
+  .context-menu-item.disabled {
+    color: #808080;
+    cursor: default;
+  }
+
+  .context-menu-text {
+    flex: 1;
+  }
+
+  .context-menu-arrow {
+    margin-left: 20px;
+    font-size: 8px;
+    color: #000000;
+    line-height: 1;
+  }
+
+  .context-menu-item:hover:not(.disabled) .context-menu-arrow {
+    color: #ffffff;
   }
 
   .context-menu-separator {
     height: 1px;
     background: #808080;
-    margin: 4px 2px;
-    border-bottom: 1px solid #fff;
+    margin: 2px 1px;
+    border-top: 1px solid #ffffff;
   }
 
 </style>

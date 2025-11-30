@@ -1,5 +1,4 @@
 <script>
-  // Languages page component
 </script>
 
 <div class="languages-page">

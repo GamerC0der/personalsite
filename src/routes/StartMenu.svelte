@@ -3,50 +3,6 @@
   export let openRunMenu;
 
   let open = false;
-  let programsMenuOpen = false;
-  let programsItemHovered = false;
-  let submenuHovered = false;
-  let gamesMenuOpen = false;
-  let gamesItemHovered = false;
-  let gamesSubmenuHovered = false;
-  let closeTimeout = null;
-
-  $: if (!open) {
-    programsMenuOpen = false;
-    gamesMenuOpen = false;
-  }
-
-  function updateProgramsMenuState() {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      closeTimeout = null;
-    }
-    programsMenuOpen = programsItemHovered || submenuHovered;
-  }
-
-  function closeProgramsMenu() {
-    closeTimeout = setTimeout(() => {
-      if (!programsItemHovered && !submenuHovered) {
-        programsMenuOpen = false;
-      }
-    }, 100);
-  }
-
-  function updateGamesMenuState() {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      closeTimeout = null;
-    }
-    gamesMenuOpen = gamesItemHovered || gamesSubmenuHovered;
-  }
-
-  function closeGamesMenu() {
-    closeTimeout = setTimeout(() => {
-      if (!gamesItemHovered && !gamesSubmenuHovered) {
-        gamesMenuOpen = false;
-      }
-    }, 100);
-  }
   const items = [
     ['windows_update_large-2', 'Windows Update'],
     ['appwizard-4', 'Programs'],
@@ -84,11 +40,15 @@
         {/if}
         <div
           class="item"
-          class:programs-item={text === 'Programs'}
-          class:games-item={text === 'Games'}
           on:click={() => {
             if (text === 'Log Off') {
               window.location.reload();
+            } else if (text === 'Programs') {
+              openNewWindow('https://98.js.org/programs/command/index.html');
+              open = false;
+            } else if (text === 'Games') {
+              openNewWindow('https://98plus.js.org/programs/minesweeper/index.html');
+              open = false;
             } else if (text === 'Windows Update') {
               openNewWindow('https://www.msn.com/update');
               open = false;
@@ -108,6 +68,12 @@
           on:keydown={() => {
             if (text === 'Log Off') {
               window.location.reload();
+            } else if (text === 'Programs') {
+              openNewWindow('https://98.js.org/programs/command/index.html');
+              open = false;
+            } else if (text === 'Games') {
+              openNewWindow('https://98plus.js.org/programs/minesweeper/index.html');
+              open = false;
             } else if (text === 'Windows Update') {
               openNewWindow('https://www.msn.com/update');
               open = false;
@@ -124,54 +90,16 @@
               open = false;
             }
           }}
-          on:mouseenter={text === 'Programs' ? () => { programsItemHovered = true; gamesMenuOpen = false; updateProgramsMenuState(); } : text === 'Games' ? () => { gamesItemHovered = true; programsMenuOpen = false; updateGamesMenuState(); } : () => { programsMenuOpen = false; gamesMenuOpen = false; }}
-          on:mouseleave={text === 'Programs' ? () => { programsItemHovered = false; closeProgramsMenu(); } : text === 'Games' ? () => { gamesItemHovered = false; closeGamesMenu(); } : null}
           role="button"
           tabindex="0"
         >
           <img src="https://win98icons.alexmeub.com/icons/png/{icon}.png" alt="{text}" class="i2">
           {text}
-          {#if text === 'Programs' || text === 'Games'}
-            <span class="arrow">▶</span>
-          {/if}
         </div>
       {/each}
     </div>
   </div>
 
-  {#if programsMenuOpen}
-    <div
-      class="programs-submenu"
-      role="menu"
-      tabindex="0"
-      on:mouseenter={() => { submenuHovered = true; updateProgramsMenuState(); }}
-      on:mouseleave={() => { submenuHovered = false; closeProgramsMenu(); }}
-    >
-      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/command/index.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98.js.org/programs/command/index.html'); open = false; } }}>
-        <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs_cool-3.png" alt="Command Prompt" class="i2">
-        Command Prompt
-      </div>
-    </div>
-  {/if}
-
-  {#if gamesMenuOpen}
-    <div
-      class="games-submenu"
-      role="menu"
-      tabindex="0"
-      on:mouseenter={() => { gamesSubmenuHovered = true; updateGamesMenuState(); }}
-      on:mouseleave={() => { gamesSubmenuHovered = false; closeGamesMenu(); }}
-    >
-      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98.js.org/programs/pinball/space-cadet.html'); open = false; } }}>
-        <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Pinball" class="i2">
-        Pinball
-      </div>
-      <div class="submenu-item" role="button" tabindex="0" on:click={() => { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; }} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { openNewWindow('https://98plus.js.org/programs/minesweeper/index.html'); open = false; } }}>
-        <img src="https://win98icons.alexmeub.com/icons/png/joystick-2.png" alt="Minesweeper" class="i2">
-        Minesweeper
-      </div>
-    </div>
-  {/if}
 {/if}
 
 
@@ -275,56 +203,5 @@
     height: 1px;
     background: #808080;
     margin: 4px 0;
-  }
-  .programs-item {
-    position: relative;
-  }
-  .games-item {
-    position: relative;
-  }
-  .arrow {
-    margin-left: auto;
-    font-size: 12px;
-    color: #000;
-  }
-  .programs-submenu {
-    position: fixed;
-    bottom: 295px;
-    left: calc(0.7% + 196px);
-    width: 120px;
-    min-height: 40px;
-    background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 3002;
-    padding: 2px 0;
-  }
-  .games-submenu {
-    position: fixed;
-    bottom: 210px;
-    left: calc(0.7% + 196px);
-    width: 120px;
-    min-height: 80px;
-    background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 3002;
-    padding: 2px 0;
-  }
-
-  .submenu-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    cursor: pointer;
-    font-family: 'Win98', 'MS Sans Serif', sans-serif;
-    font-size: 16px;
-    color: black;
-  }
-
-  .submenu-item:hover {
-    background: #000080;
-    color: white;
   }
 </style>
