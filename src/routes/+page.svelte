@@ -449,6 +449,10 @@
     messageWindows = messageWindows.filter(w => w.id !== windowId);
   }
 
+  function openFactorioPage() {
+    window.open('https://factorio.com/', '_blank');
+  }
+
   function executeRunCommand() {
     const command = runCommand.trim().toLowerCase();
     if (!command) return;
@@ -623,47 +627,16 @@
           </div>
         </div>
       {:else if window.currentUrl === 'https://www.msn.com/'}
-        <h1 class="name-header">gamerc0der</h1>
-        <div class="bio-section">bio goes here</div>
-        <div class="social-icons">
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-            <img src="https://github.githubassets.com/images/modules/site/icons/footer/github-mark.svg" alt="GitHub" class="social-icon github-icon">
-          </a>
-          <a href="https://slack.com" target="_blank" rel="noopener noreferrer">
-            <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" class="social-icon">
-          </a>
+        <h1 class="name-header">Hi<span class="light-char">,</span> I'm Matthew<span class="light-char">!</span></h1>
+        <p class="subtitle-text">I'm a coder from California, homeschooled, and my favorite game is <span class="underline-text clickable-factorio" on:click={openFactorioPage}>Factorio</span>!</p>
+        <p class="tech-stack-text"><i class="devicon-html5-plain tech-icon"></i><i class="devicon-css3-plain tech-icon"></i><i class="devicon-javascript-plain tech-icon"></i><i class="devicon-lua-plain tech-icon"></i><i class="devicon-python-plain tech-icon"></i><i class="devicon-react-plain tech-icon"></i><i class="devicon-svelte-plain tech-icon"></i><i class="devicon-nextjs-plain tech-icon"></i>I enjoy coding in Svelte and NextJS</p>
+        <p class="social-text">I'm often on Vercel and Github.<i class="devicon-vercel-plain social-icon"></i><i class="devicon-github-plain social-icon"></i><i class="devicon-figma-plain social-icon"></i><i class="devicon-vscode-plain social-icon"></i><i class="devicon-slack-plain social-icon"></i><i class="devicon-ngrok-plain social-icon"></i><i class="devicon-pypi-plain social-icon"></i></p>
+        <p class="reading-text"><img src="https://upload.wikimedia.org/wikipedia/en/d/d9/Foundation_-_Isaac_Asimov_%28Gnome_1951%29.jpg" alt="Foundation by Isaac Asimov" class="book-icon"><img src="https://upload.wikimedia.org/wikipedia/en/d/d5/I_robot.jpg" alt="I, Robot by Isaac Asimov" class="book-icon">I love reading Isaac Asimov's Robot and Foundation series</p>
+        <p class="ai-tools-text">My Favorite AI Tools are Cursor and Perplexity<svg class="ai-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z"/></svg><svg class="ai-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.785 0v7.272H22.5V17.62h-2.935V24l-7.037-6.194v6.145h-1.091v-6.152L4.392 24v-6.465H1.5V7.188h2.884V0l7.053 6.494V.19h1.09v6.49L19.786 0zm-7.257 9.044v7.319l5.946 5.234V14.44l-5.946-5.397zm-1.099-.08l-5.946 5.398v7.235l5.946-5.234V8.965zm8.136 7.58h1.844V8.349H13.46l6.105 5.54v2.655zm-8.982-8.28H2.59v8.195h1.8v-2.576l6.192-5.62zM5.475 2.476v4.71h5.115l-5.115-4.71zm13.219 0l-5.115 4.71h5.115v-4.71z"/></svg><svg fill="currentColor" fill-rule="evenodd" height="64" viewBox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg" style="flex: 0 0 auto; line-height: 1;" class="ai-icon"><title>OpenAI</title><path d="M21.55 10.004a5.416 5.416 0 00-.478-4.501c-1.217-2.09-3.662-3.166-6.05-2.66A5.59 5.59 0 0010.831 1C8.39.995 6.224 2.546 5.473 4.838A5.553 5.553 0 001.76 7.496a5.487 5.487 0 00.691 6.5 5.416 5.416 0 00.477 4.502c1.217 2.09 3.662 3.165 6.05 2.66A5.586 5.586 0 0013.168 23c2.443.006 4.61-1.546 5.361-3.84a5.553 5.553 0 003.715-2.66 5.488 5.488 0 00-.693-6.497v.001zm-8.381 11.558a4.199 4.199 0 01-2.675-.954c.034-.018.093-.05.132-.074l4.44-2.53a.71.71 0 00.364-.623v-6.176l1.877 1.069c.02.01.033.029.036.05v5.115c-.003 2.274-1.87 4.118-4.174 4.123zM4.192 17.78a4.059 4.059 0 01-.498-2.763c.032.02.09.055.131.078l4.44 2.53c.225.13.504.13.73 0l5.42-3.088v2.138a.068.068 0 01-.027.057L9.9 19.288c-1.999 1.136-4.552.46-5.707-1.51h-.001zM3.023 8.216A4.15 4.15 0 015.198 6.41l-.002.151v5.06a.711.711 0 00.364.624l5.42 3.087-1.876 1.07a.067.067 0 01-.063.005l-4.489-2.559c-1.995-1.14-2.679-3.658-1.53-5.63h.001zm15.417 3.54l-5.42-3.088L14.896 7.6a.067.067 0 01.063-.006l4.489 2.557c1.998 1.14 2.683 3.662 1.529 5.633a4.163 4.163 0 01-2.174 1.807V12.38a.71.71 0 00-.363-.623zm1.867-2.773a6.04 6.04 0 00-.132-.078l-4.44-2.53a.731.731 0 00-.729 0l-5.42 3.088V7.325a.068.068 0 01.027-.057L14.1 4.713c2-1.137 4.555-.46 5.707 1.513.487.833.664 1.809.499 2.757h.001zm-11.741 3.81l-1.877-1.068a.065.065 0 01-.036-.051V6.559c.001-2.277 1.873-4.122 4.181-4.12.976 0 1.92.338 2.671.954-.034.018-.092.05-.131.073l-4.44 2.53a.71.71 0 00-.365.623l-.003 6.173v.002zm1.02-2.168L12 9.25l2.414 1.375v2.75L12 14.75l-2.415-1.375v-2.75z"></path></svg><svg fill="currentColor" fill-rule="evenodd" height="64" viewBox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg" style="flex: 0 0 auto; line-height: 1;" class="ai-icon"><title>Grok</title><path d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"></path></svg><svg class="ai-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"></path></svg></p>
+        <div style="text-align: center; margin-top: -50px;">
+          <button style="padding: 8px 16px; background: #c0c0c0; border: 2px outset #c0c0c0; font-family: 'MS Sans Serif', sans-serif; font-size: 14px; cursor: pointer; color: #000;" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/projects')}>View my Projects</button>
+          <p style="font-family: 'MS Sans Serif', sans-serif; font-size: 11px; color: #666; margin: 4px 0 0 0;">Auto Updates!</p>
         </div>
-
-        <div class="languages-section">
-          <h2 class="languages-title">Programming Languages</h2>
-          <div class="languages-grid">
-            <div class="language-item">
-              <i class="devicon-react-original language-icon"></i>
-              <span class="language-name">React</span>
-            </div>
-            <div class="language-item">
-              <i class="devicon-svelte-plain language-icon"></i>
-              <span class="language-name">Svelte</span>
-            </div>
-            <div class="language-item">
-              <i class="devicon-html5-plain language-icon"></i>
-              <span class="language-name">HTML</span>
-            </div>
-            <div class="language-item">
-              <i class="devicon-javascript-plain language-icon"></i>
-              <span class="language-name">JavaScript</span>
-            </div>
-            <div class="language-item">
-              <i class="devicon-css3-plain language-icon"></i>
-              <span class="language-name">CSS</span>
-            </div>
-          </div>
-          <div class="view-more-container">
-            <button class="view-more-link" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/languages')}>See All Languages</button>
-          </div>
-        </div>
-
-        <button class="projects-btn" on:click={() => navigateToUrl(window.id, 'https://www.msn.com/projects')}>Projects</button>
       {:else if window.currentUrl === 'https://www.msn.com/projects'}
         <div class="projects-page">
           <h1 class="projects-title">My Projects</h1>
@@ -1080,7 +1053,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 20px;
     overflow-y: auto;
   }
@@ -1099,38 +1072,6 @@
     font-size: 12px;
   }
 
-  .social-icons {
-    display: flex;
-    gap: 20px;
-  }
-
-  .social-icon {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .social-icon:hover {
-    transform: scale(1.1);
-  }
-
-  .github-icon {
-    filter: brightness(0);
-  }
-
-  .projects-btn {
-    padding: 8px 16px;
-    background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    font-family: 'MS Sans Serif', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .projects-btn:hover {
-    border: 2px inset #c0c0c0;
-  }
 
   .about-page {
     padding: 20px;
@@ -1527,17 +1468,6 @@
   }
 
 
-  .languages-section {
-    margin-bottom: 20px;
-  }
-
-  .languages-title {
-    font-family: 'MS Sans Serif', sans-serif;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #000;
-  }
 
   .languages-grid {
     display: grid;
@@ -1571,27 +1501,6 @@
     flex: 1;
   }
 
-  .view-more-container {
-    margin-top: 15px;
-    text-align: center;
-  }
-
-  .view-more-link {
-    padding: 6px 12px;
-    background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    font-family: 'MS Sans Serif', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    color: #000;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .view-more-link:hover {
-    border: 2px inset #c0c0c0;
-    text-decoration: none;
-  }
 
   .back-container {
     margin-top: 20px;
@@ -1720,21 +1629,133 @@
     font-size: 24px;
     font-weight: bold;
     color: #000;
+    position: relative;
+    top: -5%;
+    left: -35%;
     margin-bottom: 20px;
     text-align: center;
   }
 
-  .bio-section {
+  .subtitle-text {
     font-family: 'MS Sans Serif', sans-serif;
-    font-size: 14px;
-    color: #000;
+    font-size: 16px;
+    color: #333;
+    position: relative;
+    top: -15%;
+    left: -2.5%;
     margin-bottom: 20px;
     text-align: center;
-    max-width: 400px;
+    white-space: nowrap;
+  }
+
+  .underline-text {
+    text-decoration: underline;
+  }
+
+  .clickable-factorio {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.1s ease;
+  }
+
+  .clickable-factorio:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  .tech-stack-text {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+    top: -25%;
+    left: -5%;
+    margin-bottom: 20px;
+    text-align: right;
+    white-space: nowrap;
+    max-width: 500px;
     margin-left: auto;
-    margin-right: auto;
-    line-height: 1.4;
-    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tech-icon {
+    font-size: 20px;
+    color: #666;
+  }
+
+  .social-text {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+    top: -35%;
+    left: -27%;
+    margin-bottom: 20px;
+    text-align: right;
+    white-space: nowrap;
+    max-width: 500px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .social-icon {
+    font-size: 20px;
+    color: #666;
+  }
+
+  .reading-text {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+    top: -45%;
+    left: -5%;
+    margin-bottom: 20px;
+    text-align: right;
+    white-space: nowrap;
+    max-width: 600px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .book-icon {
+    width: 24px;
+    height: 36px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+  }
+
+  .ai-tools-text {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 16px;
+    color: #666;
+    position: relative;
+    top: -55%;
+    left: -17%;
+    margin-bottom: 20px;
+    text-align: right;
+    white-space: nowrap;
+    max-width: 600px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ai-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .light-char {
+    color: #666;
   }
 
   .context-menu {
